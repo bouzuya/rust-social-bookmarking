@@ -1,6 +1,7 @@
 use crate::mail_address::MailAddress;
 use crate::password::Password;
 use crate::user::User;
+use crate::user_id::UserId;
 use crate::user_key::UserKey;
 use crate::user_repository::UserRepository;
 use crate::verify_user_secret::VerifyUserSecret;
@@ -15,7 +16,8 @@ impl UserRepositoryImpl {
 
 impl UserRepository for UserRepositoryImpl {
     fn create_user(&self, mail_address: MailAddress, password: Password) -> User {
-        let user = User::new(mail_address, password);
+        let user_id = UserId::from_i32(1).unwrap();
+        let user = User::new(user_id, mail_address, password);
         println!("create user");
         println!("key               : {}", user.key.to_string());
         println!("mail_address      : {}", user.mail_address.to_string());
@@ -33,10 +35,12 @@ impl UserRepository for UserRepositoryImpl {
     fn find_by_verify_user_secret(&self, verify_user_secret: &VerifyUserSecret) -> Option<User> {
         println!("find user by verify_user_secret");
         println!("verify_user_secret: {}", verify_user_secret.to_string());
+        let id = UserId::from_i32(123).unwrap();
         let key = UserKey::from_str("012345").unwrap();
         let mail_address = MailAddress::from_str("m@bouzuya.net").unwrap();
         let password = Password::from_str("password").unwrap();
         Some(User::of(
+            id,
             key,
             mail_address,
             password,

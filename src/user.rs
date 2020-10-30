@@ -1,11 +1,13 @@
 use crate::mail_address::MailAddress;
 use crate::password::Password;
+use crate::user_id::UserId;
 use crate::user_key::UserKey;
 use crate::verify_user_secret::VerifyUserSecret;
 use anyhow::{anyhow, Result};
 
 #[derive(Clone)]
 pub struct User {
+    pub id: UserId,
     pub key: UserKey,
     pub mail_address: MailAddress,
     pub password: Password,
@@ -13,8 +15,9 @@ pub struct User {
 }
 
 impl User {
-    pub fn new(mail_address: MailAddress, password: Password) -> Self {
+    pub fn new(id: UserId, mail_address: MailAddress, password: Password) -> Self {
         Self {
+            id,
             key: UserKey::generate(),
             mail_address,
             password,
@@ -23,12 +26,14 @@ impl User {
     }
 
     pub fn of(
+        id: UserId,
         key: UserKey,
         mail_address: MailAddress,
         password: Password,
         verify_user_secret: Option<VerifyUserSecret>,
     ) -> Self {
         Self {
+            id,
             key,
             mail_address,
             password,
@@ -43,6 +48,7 @@ impl User {
                 Err(anyhow!("verify_user_secret does not match"))
             }
             Some(_) => Ok(Self {
+                id: self.id.clone(),
                 key: self.key.clone(),
                 mail_address: self.mail_address.clone(),
                 password: self.password.clone(),
