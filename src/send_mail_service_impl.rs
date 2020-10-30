@@ -1,5 +1,5 @@
 use crate::entity::user::User;
-use crate::send_mail_service::SendMailService;
+use crate::service::send_mail_service::SendMailService;
 
 pub struct SendMailServiceImpl;
 

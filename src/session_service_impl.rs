@@ -2,7 +2,7 @@ use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
 use crate::entity::user::User;
 use crate::entity::user_id::UserId;
-use crate::session_service::SessionService;
+use crate::service::session_service::SessionService;
 use anyhow::Result;
 
 pub struct SessionServiceImpl;
