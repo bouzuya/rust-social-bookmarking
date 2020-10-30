@@ -4,7 +4,6 @@ mod password;
 mod send_mail_service;
 mod send_mail_service_impl;
 mod user;
-mod user_dao;
 mod user_key;
 mod user_repository;
 mod user_repository_impl;
@@ -15,7 +14,6 @@ use crate::create_user_use_case::CreateUserUseCase;
 use crate::mail_address::MailAddress;
 use crate::password::Password;
 use crate::send_mail_service_impl::SendMailServiceImpl;
-use crate::user_dao::UserDao;
 use crate::user_repository_impl::UserRepositoryImpl;
 use crate::verify_user_secret::VerifyUserSecret;
 use crate::verify_user_use_case::VerifyUserUseCase;
@@ -23,8 +21,7 @@ use anyhow::Result;
 
 fn create_user() {
     let send_mail_service = SendMailServiceImpl::new();
-    let user_dao = UserDao::new();
-    let user_repository = UserRepositoryImpl::new(user_dao);
+    let user_repository = UserRepositoryImpl::new();
     let create_user_use_case = CreateUserUseCase::new(send_mail_service, user_repository);
     let mail_address = MailAddress::from_str("m@bouzuya.net").unwrap();
     let password = Password::from_str("password").unwrap();
@@ -33,8 +30,7 @@ fn create_user() {
 
 fn verify_user() -> Result<()> {
     let send_mail_service = SendMailServiceImpl::new();
-    let user_dao = UserDao::new();
-    let user_repository = UserRepositoryImpl::new(user_dao);
+    let user_repository = UserRepositoryImpl::new();
     let verify_user_use_case = VerifyUserUseCase::new(send_mail_service, user_repository);
     let verify_user_secret = VerifyUserSecret::from_str("verify-user-secret1").unwrap();
     verify_user_use_case.verify_user(verify_user_secret)
