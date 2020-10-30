@@ -1,5 +1,5 @@
 [package]
-name = "rust-social-bookmark"
+name = "social-bookmarking"
 version = "0.1.0"
 authors = ["bouzuya <m@bouzuya.net>"]
 edition = "2018"
