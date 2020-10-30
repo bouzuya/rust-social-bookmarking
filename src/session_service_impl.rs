@@ -1,8 +1,8 @@
-use crate::mail_address::MailAddress;
-use crate::password::Password;
+use crate::entity::mail_address::MailAddress;
+use crate::entity::password::Password;
+use crate::entity::user::User;
+use crate::entity::user_id::UserId;
 use crate::session_service::SessionService;
-use crate::user::User;
-use crate::user_id::UserId;
 use anyhow::Result;
 
 pub struct SessionServiceImpl;

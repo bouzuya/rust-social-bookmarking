@@ -1,7 +1,7 @@
-use crate::mail_address::MailAddress;
-use crate::password::Password;
-use crate::user::User;
-use crate::verify_user_secret::VerifyUserSecret;
+use crate::entity::mail_address::MailAddress;
+use crate::entity::password::Password;
+use crate::entity::user::User;
+use crate::entity::verify_user_secret::VerifyUserSecret;
 
 pub trait UserRepository {
     fn create_user(&self, mail_address: MailAddress, password: Password) -> User;

@@ -1,5 +1,5 @@
-use crate::mail_address::MailAddress;
-use crate::password::Password;
+use crate::entity::mail_address::MailAddress;
+use crate::entity::password::Password;
 use crate::send_mail_service::SendMailService;
 use crate::user_repository::UserRepository;
 

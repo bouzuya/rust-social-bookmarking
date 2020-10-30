@@ -1,9 +1,9 @@
-use crate::bookmark::Bookmark;
-use crate::bookmark_comment::BookmarkComment;
 use crate::bookmark_repository::BookmarkRepository;
-use crate::bookmark_title::BookmarkTitle;
-use crate::bookmark_url::BookmarkUrl;
-use crate::user_id::UserId;
+use crate::entity::bookmark::Bookmark;
+use crate::entity::bookmark_comment::BookmarkComment;
+use crate::entity::bookmark_title::BookmarkTitle;
+use crate::entity::bookmark_url::BookmarkUrl;
+use crate::entity::user_id::UserId;
 use anyhow::Result;
 
 pub struct BookmarkRepositoryImpl;

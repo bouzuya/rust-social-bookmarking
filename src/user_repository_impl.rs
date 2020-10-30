@@ -1,10 +1,10 @@
-use crate::mail_address::MailAddress;
-use crate::password::Password;
-use crate::user::User;
-use crate::user_id::UserId;
-use crate::user_key::UserKey;
+use crate::entity::mail_address::MailAddress;
+use crate::entity::password::Password;
+use crate::entity::user::User;
+use crate::entity::user_id::UserId;
+use crate::entity::user_key::UserKey;
+use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::user_repository::UserRepository;
-use crate::verify_user_secret::VerifyUserSecret;
 
 pub struct UserRepositoryImpl;
 
