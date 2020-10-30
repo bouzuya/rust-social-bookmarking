@@ -1,25 +1,22 @@
-mod bookmark_repository_impl;
 mod entity;
+mod fake;
 mod repository;
-mod send_mail_service_impl;
 mod service;
-mod session_service_impl;
 mod use_case;
-mod user_repository_impl;
 
-use crate::bookmark_repository_impl::BookmarkRepositoryImpl;
 use crate::entity::bookmark_comment::BookmarkComment;
 use crate::entity::bookmark_title::BookmarkTitle;
 use crate::entity::bookmark_url::BookmarkUrl;
 use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
 use crate::entity::verify_user_secret::VerifyUserSecret;
-use crate::send_mail_service_impl::SendMailServiceImpl;
-use crate::session_service_impl::SessionServiceImpl;
+use crate::fake::bookmark_repository_impl::BookmarkRepositoryImpl;
+use crate::fake::send_mail_service_impl::SendMailServiceImpl;
+use crate::fake::session_service_impl::SessionServiceImpl;
+use crate::fake::user_repository_impl::UserRepositoryImpl;
 use crate::use_case::create_bookmark_use_case::CreateBookmarkUseCase;
 use crate::use_case::create_user_use_case::CreateUserUseCase;
 use crate::use_case::verify_user_use_case::VerifyUserUseCase;
-use crate::user_repository_impl::UserRepositoryImpl;
 use anyhow::Result;
 
 fn create_user() {
