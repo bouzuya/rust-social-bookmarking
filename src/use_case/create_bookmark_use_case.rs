@@ -1,7 +1,7 @@
-use crate::bookmark_repository::BookmarkRepository;
 use crate::entity::bookmark_comment::BookmarkComment;
 use crate::entity::bookmark_title::BookmarkTitle;
 use crate::entity::bookmark_url::BookmarkUrl;
+use crate::repository::bookmark_repository::BookmarkRepository;
 use crate::session_service::SessionService;
 use anyhow::{anyhow, Result};
 

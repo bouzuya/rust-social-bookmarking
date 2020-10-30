@@ -1,12 +1,11 @@
-mod bookmark_repository;
 mod bookmark_repository_impl;
 mod entity;
+mod repository;
 mod send_mail_service;
 mod send_mail_service_impl;
 mod session_service;
 mod session_service_impl;
 mod use_case;
-mod user_repository;
 mod user_repository_impl;
 
 use crate::bookmark_repository_impl::BookmarkRepositoryImpl;

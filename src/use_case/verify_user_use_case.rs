@@ -1,6 +1,6 @@
 use crate::entity::verify_user_secret::VerifyUserSecret;
+use crate::repository::user_repository::UserRepository;
 use crate::send_mail_service::SendMailService;
-use crate::user_repository::UserRepository;
 use anyhow::{anyhow, Result};
 
 pub struct VerifyUserUseCase<T: SendMailService, U: UserRepository> {

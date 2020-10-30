@@ -1,7 +1,7 @@
 use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
+use crate::repository::user_repository::UserRepository;
 use crate::send_mail_service::SendMailService;
-use crate::user_repository::UserRepository;
 
 pub struct CreateUserUseCase<T: SendMailService, U: UserRepository> {
     send_mail_service: T,
