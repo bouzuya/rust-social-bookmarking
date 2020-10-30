@@ -1,22 +1,21 @@
-mod create_user_use_case;
 mod mail_address;
 mod password;
 mod send_mail_service;
 mod send_mail_service_impl;
+mod use_case;
 mod user;
 mod user_key;
 mod user_repository;
 mod user_repository_impl;
 mod verify_user_secret;
-mod verify_user_use_case;
 
-use crate::create_user_use_case::CreateUserUseCase;
 use crate::mail_address::MailAddress;
 use crate::password::Password;
 use crate::send_mail_service_impl::SendMailServiceImpl;
+use crate::use_case::create_user_use_case::CreateUserUseCase;
+use crate::use_case::verify_user_use_case::VerifyUserUseCase;
 use crate::user_repository_impl::UserRepositoryImpl;
 use crate::verify_user_secret::VerifyUserSecret;
-use crate::verify_user_use_case::VerifyUserUseCase;
 use anyhow::Result;
 
 fn create_user() {
