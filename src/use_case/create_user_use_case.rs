@@ -10,7 +10,7 @@ pub trait UseCreateUserUseCase {
 
 pub trait CreateUserUseCase: UseUserRepository + UseSendMailService {
     fn create_user(&self, mail_address: MailAddress, password: Password) {
-        let user = self.user_repository().create_user(mail_address, password);
+        let user = self.user_repository().create(mail_address, password);
         self.send_mail_service().send_verify_user_mail(user);
     }
 }

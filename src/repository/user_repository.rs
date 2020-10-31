@@ -9,7 +9,7 @@ pub trait UseUserRepository {
 }
 
 pub trait UserRepository {
-    fn create_user(&self, mail_address: MailAddress, password: Password) -> User;
+    fn create(&self, mail_address: MailAddress, password: Password) -> User;
     fn find_by_verify_user_secret(&self, verify_user_secret: &VerifyUserSecret) -> Option<User>;
     fn save(&self, user: &User) -> bool;
 }

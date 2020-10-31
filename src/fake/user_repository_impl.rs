@@ -15,7 +15,7 @@ impl UserRepositoryImpl {
 }
 
 impl UserRepository for UserRepositoryImpl {
-    fn create_user(&self, mail_address: MailAddress, password: Password) -> User {
+    fn create(&self, mail_address: MailAddress, password: Password) -> User {
         let user_id = UserId::from_i32(1).unwrap();
         let user = User::new(user_id, mail_address, password);
         println!("create user");
