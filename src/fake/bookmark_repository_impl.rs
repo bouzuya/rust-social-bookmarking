@@ -24,7 +24,7 @@ impl BookmarkRepository for BookmarkRepositoryImpl {
   ) -> Result<Bookmark> {
     println!("create bookmark");
     let bookmark = Bookmark::new(user_id, url, title, comment);
-    println!("  user_id: {}", bookmark.user_id.to_i32());
+    println!("  user_id: {:?}", bookmark.user_id);
     println!("  url: {}", bookmark.url.to_string());
     println!("  title: {}", bookmark.title.to_string());
     println!("  comment: {}", bookmark.comment.to_string());

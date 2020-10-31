@@ -1,16 +1,21 @@
-#[derive(Clone)]
+use std::convert::TryFrom;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct UserId(i32);
 
-impl UserId {
-    pub fn from_i32(i: i32) -> Option<Self> {
-        if i > 0 {
-            Some(UserId(i))
+impl TryFrom<i32> for UserId {
+    type Error = &'static str;
+    fn try_from(i: i32) -> Result<Self, <Self as TryFrom<i32>>::Error> {
+        if i >= 1 {
+            Ok(UserId(i))
         } else {
-            None
+            Err("UserId >= 1")
         }
     }
+}
 
-    pub fn to_i32(&self) -> i32 {
-        self.0
+impl From<UserId> for i32 {
+    fn from(user_id: UserId) -> Self {
+        user_id.0
     }
 }

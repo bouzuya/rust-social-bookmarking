@@ -6,6 +6,7 @@ use crate::entity::user_key::UserKey;
 use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::repository::user_repository::UserRepository;
 use anyhow::Result;
+use std::convert::TryFrom;
 
 pub struct UserRepositoryImpl;
 
@@ -17,14 +18,15 @@ impl UserRepositoryImpl {
 
 impl UserRepository for UserRepositoryImpl {
     fn create(&self, mail_address: MailAddress, password: Password) -> Result<User> {
-        let user_id = UserId::from_i32(1).unwrap();
+        let user_id = UserId::try_from(1).unwrap();
         let user = User::new(user_id, mail_address, password);
         println!("create user");
-        println!("key               : {}", user.key.to_string());
-        println!("mail_address      : {}", user.mail_address.to_string());
-        println!("password          : {}", user.password.to_string());
+        println!("  user_id           : {:?}", user.id);
+        println!("  key               : {}", user.key.to_string());
+        println!("  mail_address      : {}", user.mail_address.to_string());
+        println!("  password          : {}", user.password.to_string());
         println!(
-            "verify_user_secret: {}",
+            "  verify_user_secret: {}",
             user.verify_user_secret
                 .clone()
                 .map(|s| s.to_string())
@@ -36,7 +38,7 @@ impl UserRepository for UserRepositoryImpl {
     fn find_by_verify_user_secret(&self, verify_user_secret: &VerifyUserSecret) -> Option<User> {
         println!("find user by verify_user_secret");
         println!("verify_user_secret: {}", verify_user_secret.to_string());
-        let id = UserId::from_i32(123).unwrap();
+        let id = UserId::try_from(1).unwrap();
         let key = UserKey::from_str("012345").unwrap();
         let mail_address = MailAddress::from_str("m@bouzuya.net").unwrap();
         let password = Password::from_str("password").unwrap();
