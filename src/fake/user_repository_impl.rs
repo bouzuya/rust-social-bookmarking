@@ -5,6 +5,7 @@ use crate::entity::user_id::UserId;
 use crate::entity::user_key::UserKey;
 use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::repository::user_repository::UserRepository;
+use anyhow::Result;
 
 pub struct UserRepositoryImpl;
 
@@ -15,7 +16,7 @@ impl UserRepositoryImpl {
 }
 
 impl UserRepository for UserRepositoryImpl {
-    fn create(&self, mail_address: MailAddress, password: Password) -> User {
+    fn create(&self, mail_address: MailAddress, password: Password) -> Result<User> {
         let user_id = UserId::from_i32(1).unwrap();
         let user = User::new(user_id, mail_address, password);
         println!("create user");
@@ -29,7 +30,7 @@ impl UserRepository for UserRepositoryImpl {
                 .map(|s| s.to_string())
                 .unwrap_or_default()
         );
-        user
+        Ok(user)
     }
 
     fn find_by_verify_user_secret(&self, verify_user_secret: &VerifyUserSecret) -> Option<User> {
