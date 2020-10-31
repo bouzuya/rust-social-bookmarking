@@ -12,12 +12,10 @@ use crate::entity::password::Password;
 use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::fake::bookmark_repository_impl::BookmarkRepositoryImpl;
 use crate::fake::fake_env::FakeEnv;
-use crate::fake::send_mail_service_impl::SendMailServiceImpl;
 use crate::fake::session_service_impl::SessionServiceImpl;
-use crate::fake::user_repository_impl::UserRepositoryImpl;
 use crate::use_case::create_bookmark_use_case::CreateBookmarkUseCase;
 use crate::use_case::create_user_use_case::{CreateUserUseCase, UseCreateUserUseCase};
-use crate::use_case::verify_user_use_case::VerifyUserUseCase;
+use crate::use_case::verify_user_use_case::{UseVerifyUserUseCase, VerifyUserUseCase};
 use anyhow::Result;
 
 fn create_user<T: UseCreateUserUseCase>(env: &T) {
@@ -27,12 +25,9 @@ fn create_user<T: UseCreateUserUseCase>(env: &T) {
         .create_user(mail_address, password);
 }
 
-fn verify_user() -> Result<()> {
-    let send_mail_service = SendMailServiceImpl::new();
-    let user_repository = UserRepositoryImpl::new();
-    let verify_user_use_case = VerifyUserUseCase::new(send_mail_service, user_repository);
+fn verify_user<T: UseVerifyUserUseCase>(env: &T) -> Result<()> {
     let verify_user_secret = VerifyUserSecret::from_str("verify-user-secret1").unwrap();
-    verify_user_use_case.verify_user(verify_user_secret)
+    env.verify_user_use_case().verify_user(verify_user_secret)
 }
 
 fn create_bookmark() -> Result<()> {
@@ -49,6 +44,6 @@ fn create_bookmark() -> Result<()> {
 fn main() {
     let env = FakeEnv::new();
     create_user(&env);
-    verify_user().expect("verify user error");
+    verify_user(&env).expect("verify user error");
     create_bookmark().expect("create bookmark");
 }

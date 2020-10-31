@@ -1,31 +1,24 @@
 use crate::entity::verify_user_secret::VerifyUserSecret;
-use crate::repository::user_repository::UserRepository;
-use crate::service::send_mail_service::SendMailService;
+use crate::repository::user_repository::{UseUserRepository, UserRepository};
+use crate::service::send_mail_service::{SendMailService, UseSendMailService};
 use anyhow::{anyhow, Result};
 
-pub struct VerifyUserUseCase<T: SendMailService, U: UserRepository> {
-    send_mail_service: T,
-    user_repository: U,
+pub trait UseVerifyUserUseCase {
+    type VerifyUserUseCase: VerifyUserUseCase;
+    fn verify_user_use_case(&self) -> &Self::VerifyUserUseCase;
 }
 
-impl<T: SendMailService, U: UserRepository> VerifyUserUseCase<T, U> {
-    pub fn new(send_mail_service: T, user_repository: U) -> Self {
-        Self {
-            send_mail_service,
-            user_repository,
-        }
-    }
-
-    pub fn verify_user(&self, verify_user_secret: VerifyUserSecret) -> Result<()> {
+pub trait VerifyUserUseCase: UseUserRepository + UseSendMailService {
+    fn verify_user(&self, verify_user_secret: VerifyUserSecret) -> Result<()> {
         match self
-            .user_repository
+            .user_repository()
             .find_by_verify_user_secret(&verify_user_secret)
         {
             None => Err(anyhow!("user not found")),
             Some(user) => {
                 let verified = user.verify(&verify_user_secret)?;
-                if self.user_repository.save(&verified) {
-                    self.send_mail_service.send_user_verified_mail(&verified);
+                if self.user_repository().save(&verified) {
+                    self.send_mail_service().send_user_verified_mail(&verified);
                     Ok(())
                 } else {
                     Err(anyhow!("save failed"))
@@ -34,3 +27,5 @@ impl<T: SendMailService, U: UserRepository> VerifyUserUseCase<T, U> {
         }
     }
 }
+
+impl<T: UseUserRepository + UseSendMailService> VerifyUserUseCase for T {}

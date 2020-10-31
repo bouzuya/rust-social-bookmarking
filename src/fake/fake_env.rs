@@ -3,6 +3,7 @@ use crate::fake::user_repository_impl::UserRepositoryImpl;
 use crate::repository::user_repository::UseUserRepository;
 use crate::service::send_mail_service::UseSendMailService;
 use crate::use_case::create_user_use_case::UseCreateUserUseCase;
+use crate::use_case::verify_user_use_case::UseVerifyUserUseCase;
 
 pub struct FakeEnv {
   send_mail_service: SendMailServiceImpl,
@@ -18,12 +19,16 @@ impl FakeEnv {
   }
 }
 
-impl UseCreateUserUseCase for FakeEnv {
-  type CreateUserUseCase = Self;
-  fn create_user_use_case(&self) -> &Self::CreateUserUseCase {
-    self
+//  repository
+
+impl UseUserRepository for FakeEnv {
+  type UserRepository = UserRepositoryImpl;
+  fn user_repository(&self) -> &Self::UserRepository {
+    &self.user_repository
   }
 }
+
+// service
 
 impl UseSendMailService for FakeEnv {
   type SendMailService = SendMailServiceImpl;
@@ -32,9 +37,18 @@ impl UseSendMailService for FakeEnv {
   }
 }
 
-impl UseUserRepository for FakeEnv {
-  type UserRepository = UserRepositoryImpl;
-  fn user_repository(&self) -> &Self::UserRepository {
-    &self.user_repository
+// usecase
+
+impl UseCreateUserUseCase for FakeEnv {
+  type CreateUserUseCase = Self;
+  fn create_user_use_case(&self) -> &Self::CreateUserUseCase {
+    self
+  }
+}
+
+impl UseVerifyUserUseCase for FakeEnv {
+  type VerifyUserUseCase = Self;
+  fn verify_user_use_case(&self) -> &Self::VerifyUserUseCase {
+    self
   }
 }
