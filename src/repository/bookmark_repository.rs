@@ -5,6 +5,11 @@ use crate::entity::bookmark_url::BookmarkUrl;
 use crate::entity::user_id::UserId;
 use anyhow::Result;
 
+pub trait UseBookmarkRepository {
+  type BookmarkRepository: BookmarkRepository;
+  fn bookmark_repository(&self) -> &Self::BookmarkRepository;
+}
+
 pub trait BookmarkRepository {
   fn create(
     &self,
