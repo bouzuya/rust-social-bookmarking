@@ -1,23 +1,18 @@
 use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
-use crate::repository::user_repository::UserRepository;
-use crate::service::send_mail_service::SendMailService;
+use crate::repository::user_repository::{UseUserRepository, UserRepository};
+use crate::service::send_mail_service::{SendMailService, UseSendMailService};
 
-pub struct CreateUserUseCase<T: SendMailService, U: UserRepository> {
-    send_mail_service: T,
-    user_repository: U,
+pub trait UseCreateUserUseCase {
+    type CreateUserUseCase: CreateUserUseCase;
+    fn create_user_use_case(&self) -> &Self::CreateUserUseCase;
 }
 
-impl<T: SendMailService, U: UserRepository> CreateUserUseCase<T, U> {
-    pub fn new(send_mail_service: T, user_repository: U) -> Self {
-        CreateUserUseCase {
-            send_mail_service,
-            user_repository,
-        }
-    }
-
-    pub fn create_user(&self, mail_address: MailAddress, password: Password) {
-        let user = self.user_repository.create_user(mail_address, password);
-        self.send_mail_service.send_verify_user_mail(user);
+pub trait CreateUserUseCase: UseUserRepository + UseSendMailService {
+    fn create_user(&self, mail_address: MailAddress, password: Password) {
+        let user = self.user_repository().create_user(mail_address, password);
+        self.send_mail_service().send_verify_user_mail(user);
     }
 }
+
+impl<T: UseUserRepository + UseSendMailService> CreateUserUseCase for T {}
