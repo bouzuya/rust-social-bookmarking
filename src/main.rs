@@ -4,7 +4,6 @@ mod repository;
 mod service;
 mod use_case;
 
-use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::fake::fake_env::FakeEnv;
 use crate::use_case::create_bookmark_use_case::{CreateBookmarkUseCase, UseCreateBookmarkUseCase};
 use crate::use_case::create_user_use_case::{CreateUserUseCase, UseCreateUserUseCase};
@@ -19,7 +18,7 @@ fn create_user<T: UseCreateUserUseCase>(env: &T) -> Result<()> {
 }
 
 fn verify_user<T: UseVerifyUserUseCase>(env: &T) -> Result<()> {
-    let verify_user_secret = VerifyUserSecret::from_str("verify-user-secret1").unwrap();
+    let verify_user_secret = "1".repeat(255).parse().unwrap();
     env.verify_user_use_case().verify_user(verify_user_secret)
 }
 
