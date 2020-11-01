@@ -2,7 +2,6 @@ use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
 use crate::entity::user::User;
 use crate::entity::user_id::UserId;
-use crate::entity::user_key::UserKey;
 use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::repository::user_repository::UserRepository;
 use anyhow::Result;
@@ -39,7 +38,7 @@ impl UserRepository for UserRepositoryImpl {
         println!("find user by verify_user_secret");
         println!("verify_user_secret: {}", verify_user_secret.to_string());
         let id = UserId::try_from(1).unwrap();
-        let key = UserKey::from_str("012345").unwrap();
+        let key = "123456789012".parse().unwrap();
         let mail_address = "m@bouzuya.net".parse().unwrap();
         let password = "password".parse().unwrap();
         Some(User::of(
