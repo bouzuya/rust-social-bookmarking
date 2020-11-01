@@ -31,7 +31,7 @@ fn verify_user<T: UseVerifyUserUseCase>(env: &T) -> Result<()> {
 fn create_bookmark<T: UseCreateBookmarkUseCase>(env: &T) -> Result<()> {
     let url = BookmarkUrl::from_str("https://bouzuya.net").unwrap();
     let title = BookmarkTitle::from_str("bouzuya.net").unwrap();
-    let comment = BookmarkComment::from_str("bouzuya's webpage").unwrap();
+    let comment = "bouzuya's webpage".parse::<BookmarkComment>().unwrap();
     env.create_bookmark_use_case()
         .create_bookmark(url, title, comment)
 }
