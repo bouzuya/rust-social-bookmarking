@@ -4,7 +4,6 @@ mod repository;
 mod service;
 mod use_case;
 
-use crate::entity::bookmark_url::BookmarkUrl;
 use crate::entity::password::Password;
 use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::fake::fake_env::FakeEnv;
@@ -26,7 +25,7 @@ fn verify_user<T: UseVerifyUserUseCase>(env: &T) -> Result<()> {
 }
 
 fn create_bookmark<T: UseCreateBookmarkUseCase>(env: &T) -> Result<()> {
-    let url = BookmarkUrl::from_str("https://bouzuya.net").unwrap();
+    let url = "https://bouzuya.net".parse().unwrap();
     let title = "bouzuya.net".parse().unwrap();
     let comment = "bouzuya's webpage".parse().unwrap();
     env.create_bookmark_use_case()
