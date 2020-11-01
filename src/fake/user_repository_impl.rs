@@ -40,7 +40,7 @@ impl UserRepository for UserRepositoryImpl {
         println!("verify_user_secret: {}", verify_user_secret.to_string());
         let id = UserId::try_from(1).unwrap();
         let key = UserKey::from_str("012345").unwrap();
-        let mail_address = MailAddress::from_str("m@bouzuya.net").unwrap();
+        let mail_address = "m@bouzuya.net".parse::<MailAddress>().unwrap();
         let password = Password::from_str("password").unwrap();
         Some(User::of(
             id,

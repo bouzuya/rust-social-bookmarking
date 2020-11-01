@@ -17,7 +17,7 @@ use crate::use_case::verify_user_use_case::{UseVerifyUserUseCase, VerifyUserUseC
 use anyhow::Result;
 
 fn create_user<T: UseCreateUserUseCase>(env: &T) -> Result<()> {
-    let mail_address = MailAddress::from_str("m@bouzuya.net").unwrap();
+    let mail_address = "m@bouzuya.net".parse::<MailAddress>().unwrap();
     let password = Password::from_str("password").unwrap();
     env.create_user_use_case()
         .create_user(mail_address, password)

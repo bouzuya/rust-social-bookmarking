@@ -17,7 +17,7 @@ impl SessionServiceImpl {
 impl SessionService for SessionServiceImpl {
   fn get_current_user(&self) -> Result<Option<User>> {
     let user_id = UserId::try_from(1).unwrap();
-    let mail_address = MailAddress::from_str("m@bouzuya.net").unwrap();
+    let mail_address = "m@bouzuya.net".parse::<MailAddress>().unwrap();
     let password = Password::from_str("password").unwrap();
     let user = User::new(user_id, mail_address, password);
     Ok(Some(user))
