@@ -4,7 +4,6 @@ mod repository;
 mod service;
 mod use_case;
 
-use crate::entity::password::Password;
 use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::fake::fake_env::FakeEnv;
 use crate::use_case::create_bookmark_use_case::{CreateBookmarkUseCase, UseCreateBookmarkUseCase};
@@ -14,7 +13,7 @@ use anyhow::Result;
 
 fn create_user<T: UseCreateUserUseCase>(env: &T) -> Result<()> {
     let mail_address = "m@bouzuya.net".parse().unwrap();
-    let password = Password::from_str("password").unwrap();
+    let password = "password".parse().unwrap();
     env.create_user_use_case()
         .create_user(mail_address, password)
 }
