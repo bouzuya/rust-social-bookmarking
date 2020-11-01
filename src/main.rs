@@ -9,7 +9,7 @@ use crate::use_case::create_bookmark_use_case::{CreateBookmarkUseCase, UseCreate
 use crate::use_case::create_credential_use_case::{
     CreateCredentialUseCase, UseCreateCredentialUseCase,
 };
-use crate::use_case::verify_user_use_case::{UseVerifyUserUseCase, VerifyUserUseCase};
+use crate::use_case::create_user_use_case::{CreateUserUseCase, UseCreateUserUseCase};
 use anyhow::Result;
 
 fn create_credential<T: UseCreateCredentialUseCase>(env: &T) -> Result<()> {
@@ -19,9 +19,9 @@ fn create_credential<T: UseCreateCredentialUseCase>(env: &T) -> Result<()> {
         .create_credential(mail_address, password)
 }
 
-fn verify_user<T: UseVerifyUserUseCase>(env: &T) -> Result<()> {
+fn create_user<T: UseCreateUserUseCase>(env: &T) -> Result<()> {
     let verify_user_secret = "1".repeat(255).parse().unwrap();
-    env.verify_user_use_case().verify_user(verify_user_secret)
+    env.create_user_use_case().create_user(verify_user_secret)
 }
 
 fn create_bookmark<T: UseCreateBookmarkUseCase>(env: &T) -> Result<()> {
@@ -35,6 +35,6 @@ fn create_bookmark<T: UseCreateBookmarkUseCase>(env: &T) -> Result<()> {
 fn main() {
     let env = FakeEnv::new();
     create_credential(&env).expect("create credential");
-    verify_user(&env).expect("verify user error");
+    create_user(&env).expect("create user error");
     create_bookmark(&env).expect("create bookmark");
 }

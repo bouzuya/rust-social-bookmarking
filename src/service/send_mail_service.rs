@@ -8,5 +8,5 @@ pub trait UseSendMailService {
 
 pub trait SendMailService {
     fn send_create_user_mail(&self, credential: &Credential);
-    fn send_user_verified_mail(&self, user: &User);
+    fn send_user_verified_mail(&self, user: &User, credential: &Credential);
 }

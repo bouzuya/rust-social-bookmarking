@@ -1,8 +1,10 @@
 use crate::entity::credential::Credential;
 use crate::entity::credential_id::CredentialId;
 use crate::entity::credential_verification::CredentialVerification;
+use crate::entity::credential_verification_expired_at::CredentialVerificationExpiredAt;
 use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
+use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::repository::credential_repository::CredentialRepository;
 use anyhow::Result;
 use std::convert::TryInto;
@@ -33,8 +35,29 @@ impl CredentialRepository for CredentialRepositoryImpl {
     Ok(Some(credential))
   }
 
+  fn find_by_verify_user_secret(
+    &self,
+    verify_user_secret: &VerifyUserSecret,
+  ) -> Result<Option<Credential>> {
+    println!("CredentialRepository#find_by_verify_user_secret");
+    let credential_id = 1.try_into().unwrap();
+    let mail_address = "m@bouzuya.net".parse().unwrap();
+    let password = "password".parse().unwrap();
+    let verification = Some(CredentialVerification::of(
+      CredentialVerificationExpiredAt::new(),
+      verify_user_secret.clone(),
+    ));
+    let credential = Credential::of(credential_id, mail_address, password, verification);
+    Ok(Some(credential))
+  }
+
   fn delete(&self, _: &CredentialId) -> Result<()> {
     println!("CredentialRepository#delete");
+    Ok(())
+  }
+
+  fn save(&self, _: Credential) -> Result<()> {
+    println!("CredentialRepository#save");
     Ok(())
   }
 }

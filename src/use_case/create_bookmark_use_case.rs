@@ -21,7 +21,7 @@ pub trait CreateBookmarkUseCase: UseBookmarkRepository + UseSessionService {
             None => Err(anyhow!("no current user")),
             Some(current_user) => {
                 self.bookmark_repository()
-                    .create(current_user.id, url, title, comment)?;
+                    .create(current_user.id(), url, title, comment)?;
                 Ok(())
             }
         };

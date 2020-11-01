@@ -1,7 +1,5 @@
-use crate::entity::mail_address::MailAddress;
-use crate::entity::password::Password;
+use crate::entity::credential::Credential;
 use crate::entity::user::User;
-use crate::entity::verify_user_secret::VerifyUserSecret;
 use anyhow::Result;
 
 pub trait UseUserRepository {
@@ -10,7 +8,5 @@ pub trait UseUserRepository {
 }
 
 pub trait UserRepository {
-    fn create(&self, mail_address: MailAddress, password: Password) -> Result<User>;
-    fn find_by_verify_user_secret(&self, verify_user_secret: &VerifyUserSecret) -> Option<User>;
-    fn save(&self, user: &User) -> bool;
+    fn create(&self, credential: &Credential) -> Result<User>;
 }

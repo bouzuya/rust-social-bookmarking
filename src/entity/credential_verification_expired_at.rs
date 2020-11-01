@@ -8,6 +8,10 @@ impl CredentialVerificationExpiredAt {
     pub fn new() -> Self {
         Self(Utc::now() + Duration::hours(1))
     }
+
+    pub fn expired(&self) -> bool {
+        self.0 < Utc::now()
+    }
 }
 
 impl From<NaiveDateTime> for CredentialVerificationExpiredAt {

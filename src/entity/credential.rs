@@ -2,6 +2,8 @@ use crate::entity::credential_id::CredentialId;
 use crate::entity::credential_verification::CredentialVerification;
 use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
+use crate::entity::verify_user_secret::VerifyUserSecret;
+use anyhow::{anyhow, Result};
 
 pub struct Credential {
     id: CredentialId,
@@ -48,5 +50,20 @@ impl Credential {
 
     pub fn verification(&self) -> Option<CredentialVerification> {
         self.verification.clone()
+    }
+
+    pub fn verify(&self, verify_user_secret: &VerifyUserSecret) -> Result<Self> {
+        match &self.verification {
+            None => Err(anyhow!("no verification")),
+            Some(verification) => {
+                verification.verify(verify_user_secret)?;
+                Ok(Self {
+                    id: self.id(),
+                    mail_address: self.mail_address(),
+                    password: self.password(),
+                    verification: None,
+                })
+            }
+        }
     }
 }

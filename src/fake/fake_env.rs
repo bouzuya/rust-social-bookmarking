@@ -10,7 +10,7 @@ use crate::service::send_mail_service::UseSendMailService;
 use crate::service::session_service::UseSessionService;
 use crate::use_case::create_bookmark_use_case::UseCreateBookmarkUseCase;
 use crate::use_case::create_credential_use_case::UseCreateCredentialUseCase;
-use crate::use_case::verify_user_use_case::UseVerifyUserUseCase;
+use crate::use_case::create_user_use_case::UseCreateUserUseCase;
 
 pub struct FakeEnv {
   bookmark_repository: BookmarkRepositoryImpl,
@@ -87,9 +87,9 @@ impl UseCreateCredentialUseCase for FakeEnv {
   }
 }
 
-impl UseVerifyUserUseCase for FakeEnv {
-  type VerifyUserUseCase = Self;
-  fn verify_user_use_case(&self) -> &Self::VerifyUserUseCase {
+impl UseCreateUserUseCase for FakeEnv {
+  type CreateUserUseCase = Self;
+  fn create_user_use_case(&self) -> &Self::CreateUserUseCase {
     self
   }
 }
