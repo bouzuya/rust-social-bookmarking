@@ -14,6 +14,7 @@ use crate::use_case::create_user_use_case::UseCreateUserUseCase;
 use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
+use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
 
 pub struct FakeEnv {
   bookmark_repository: BookmarkRepositoryImpl,
@@ -114,6 +115,13 @@ impl UseListBookmarksUseCase for FakeEnv {
 impl UseUpdateBookmarkUseCase for FakeEnv {
   type UpdateBookmarkUseCase = Self;
   fn update_bookmark_use_case(&self) -> &Self::UpdateBookmarkUseCase {
+    self
+  }
+}
+
+impl UseUpdateMailAddressUseCase for FakeEnv {
+  type UpdateMailAddressUseCase = Self;
+  fn update_mail_address_use_case(&self) -> &Self::UpdateMailAddressUseCase {
     self
   }
 }
