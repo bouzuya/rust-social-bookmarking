@@ -14,6 +14,7 @@ use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
 use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
+use crate::use_case::verify_mail_address_use_case::UseVerifyMailAddressUseCase;
 use anyhow::Result;
 
 fn create_credential<T: UseCreateCredentialUseCase>(env: &T) -> Result<()> {
@@ -52,6 +53,10 @@ fn update_mail_address<T: UseUpdateMailAddressUseCase>(_: &T) -> Result<()> {
     todo!()
 }
 
+fn verify_mail_address<T: UseVerifyMailAddressUseCase>(_: &T) -> Result<()> {
+    todo!()
+}
+
 fn main() {
     let env = FakeEnv::new();
     create_credential(&env).expect("create credential");
@@ -61,4 +66,5 @@ fn main() {
     update_bookmark(&env).expect("update bookmark");
     delete_bookmark(&env).expect("delete bookmark");
     update_mail_address(&env).expect("update mail_address");
+    verify_mail_address(&env).expect("verify mail_address");
 }
