@@ -15,6 +15,7 @@ use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::sign_in_use_case::UseSignInUseCase;
+use crate::use_case::sign_out_use_case::UseSignOutUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
 use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
 use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
@@ -66,6 +67,10 @@ fn verify_mail_address<T: UseVerifyMailAddressUseCase>(_: &T) -> Result<()> {
     todo!()
 }
 
+fn sign_out<T: UseSignOutUseCase>(_: &T) -> Result<()> {
+    todo!()
+}
+
 fn reset_password<T: UseResetPasswordUseCase>(_: &T) -> Result<()> {
     todo!()
 }
@@ -94,7 +99,9 @@ fn main() {
     update_mail_address(&env).expect("update mail_address");
     verify_mail_address(&env).expect("verify mail_address");
     update_password(&env).expect("update password");
+    sign_out(&env).expect("sign out");
     reset_password(&env).expect("reset password");
     update_password_by_secret(&env).expect("update password by secret");
+    sign_in(&env).expect("sign in (2)");
     delete_user(&env).expect("delete user");
 }

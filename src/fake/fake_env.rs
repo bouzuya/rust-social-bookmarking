@@ -16,6 +16,7 @@ use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::sign_in_use_case::UseSignInUseCase;
+use crate::use_case::sign_out_use_case::UseSignOutUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
 use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
 use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
@@ -163,6 +164,13 @@ impl UseResetPasswordUseCase for FakeEnv {
 impl UseSignInUseCase for FakeEnv {
   type SignInUseCase = Self;
   fn sign_in_use_case(&self) -> &Self::SignInUseCase {
+    self
+  }
+}
+
+impl UseSignOutUseCase for FakeEnv {
+  type SignOutUseCase = Self;
+  fn sign_out_use_case(&self) -> &Self::SignOutUseCase {
     self
   }
 }
