@@ -9,7 +9,6 @@ use crate::repository::user_repository::UseUserRepository;
 use crate::service::send_mail_service::UseSendMailService;
 use crate::service::session_service::UseSessionService;
 use crate::use_case::create_bookmark_use_case::UseCreateBookmarkUseCase;
-use crate::use_case::create_credential_use_case::UseCreateCredentialUseCase;
 use crate::use_case::create_user_use_case::UseCreateUserUseCase;
 use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
@@ -18,6 +17,7 @@ use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::sign_in_use_case::UseSignInUseCase;
 use crate::use_case::sign_out_use_case::UseSignOutUseCase;
+use crate::use_case::sign_up_use_case::UseSignUpUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
 use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
 use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
@@ -88,13 +88,6 @@ impl UseSessionService for FakeEnv {
 impl UseCreateBookmarkUseCase for FakeEnv {
   type CreateBookmarkUseCase = Self;
   fn create_bookmark_use_case(&self) -> &Self::CreateBookmarkUseCase {
-    self
-  }
-}
-
-impl UseCreateCredentialUseCase for FakeEnv {
-  type CreateCredentialUseCase = Self;
-  fn create_credential_use_case(&self) -> &Self::CreateCredentialUseCase {
     self
   }
 }
@@ -179,6 +172,13 @@ impl UseSignInUseCase for FakeEnv {
 impl UseSignOutUseCase for FakeEnv {
   type SignOutUseCase = Self;
   fn sign_out_use_case(&self) -> &Self::SignOutUseCase {
+    self
+  }
+}
+
+impl UseSignUpUseCase for FakeEnv {
+  type SignUpUseCase = Self;
+  fn sign_up_use_case(&self) -> &Self::SignUpUseCase {
     self
   }
 }

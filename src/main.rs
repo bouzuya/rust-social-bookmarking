@@ -6,9 +6,6 @@ mod use_case;
 
 use crate::fake::fake_env::FakeEnv;
 use crate::use_case::create_bookmark_use_case::{CreateBookmarkUseCase, UseCreateBookmarkUseCase};
-use crate::use_case::create_credential_use_case::{
-    CreateCredentialUseCase, UseCreateCredentialUseCase,
-};
 use crate::use_case::create_user_use_case::{CreateUserUseCase, UseCreateUserUseCase};
 use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
@@ -17,6 +14,7 @@ use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::sign_in_use_case::UseSignInUseCase;
 use crate::use_case::sign_out_use_case::UseSignOutUseCase;
+use crate::use_case::sign_up_use_case::{SignUpUseCase, UseSignUpUseCase};
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
 use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
 use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
@@ -24,11 +22,10 @@ use crate::use_case::update_password_use_case::UseUpdatePasswordUseCase;
 use crate::use_case::verify_mail_address_use_case::UseVerifyMailAddressUseCase;
 use anyhow::Result;
 
-fn create_credential<T: UseCreateCredentialUseCase>(env: &T) -> Result<()> {
+fn sign_up<T: UseSignUpUseCase>(env: &T) -> Result<()> {
     let mail_address = "m@bouzuya.net".parse().unwrap();
     let password = "password".parse().unwrap();
-    env.create_credential_use_case()
-        .create_credential(mail_address, password)
+    env.sign_up_use_case().sign_up(mail_address, password)
 }
 
 fn create_user<T: UseCreateUserUseCase>(env: &T) -> Result<()> {
@@ -94,7 +91,7 @@ fn delete_user<T: UseDeleteUserUseCase>(_: &T) -> Result<()> {
 
 fn main() {
     let env = FakeEnv::new();
-    create_credential(&env).expect("create credential");
+    sign_up(&env).expect("sign up");
     create_user(&env).expect("create user error");
     sign_in(&env).expect("sign in");
     get_current_user(&env).expect("get current user error");
