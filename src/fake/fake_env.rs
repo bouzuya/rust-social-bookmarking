@@ -13,6 +13,7 @@ use crate::use_case::create_credential_use_case::UseCreateCredentialUseCase;
 use crate::use_case::create_user_use_case::UseCreateUserUseCase;
 use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
+use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
 use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
 use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
@@ -139,6 +140,13 @@ impl UseUpdatePasswordBySecretUseCase for FakeEnv {
 impl UseUpdatePasswordUseCase for FakeEnv {
   type UpdatePasswordUseCase = Self;
   fn update_password_use_case(&self) -> &Self::UpdatePasswordUseCase {
+    self
+  }
+}
+
+impl UseResetPasswordUseCase for FakeEnv {
+  type ResetPasswordUseCase = Self;
+  fn reset_password_use_case(&self) -> &Self::ResetPasswordUseCase {
     self
   }
 }
