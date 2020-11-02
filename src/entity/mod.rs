@@ -1,6 +1,7 @@
 pub mod bookmark;
 pub mod bookmark_comment;
 pub mod bookmark_id;
+pub mod bookmark_key;
 pub mod bookmark_title;
 pub mod bookmark_url;
 pub mod credential;
