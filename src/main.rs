@@ -92,9 +92,9 @@ fn delete_user<T: UseDeleteUserUseCase>(_: &T) -> Result<()> {
 fn main() {
     let env = FakeEnv::new();
     sign_up(&env).expect("sign up");
-    create_user(&env).expect("create user error");
+    create_user(&env).expect("create user");
     sign_in(&env).expect("sign in");
-    get_current_user(&env).expect("get current user error");
+    get_current_user(&env).expect("get current user");
     create_bookmark(&env).expect("create bookmark");
     list_bookmarks(&env).expect("list bookmarks");
     update_bookmark(&env).expect("update bookmark");
