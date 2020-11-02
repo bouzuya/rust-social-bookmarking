@@ -14,6 +14,7 @@ use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
+use crate::use_case::sign_in_use_case::UseSignInUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
 use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
 use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
@@ -31,6 +32,10 @@ fn create_credential<T: UseCreateCredentialUseCase>(env: &T) -> Result<()> {
 fn create_user<T: UseCreateUserUseCase>(env: &T) -> Result<()> {
     let verify_user_secret = "1".repeat(255).parse().unwrap();
     env.create_user_use_case().create_user(verify_user_secret)
+}
+
+fn sign_in<T: UseSignInUseCase>(_: &T) -> Result<()> {
+    todo!()
 }
 
 fn create_bookmark<T: UseCreateBookmarkUseCase>(env: &T) -> Result<()> {
@@ -81,6 +86,7 @@ fn main() {
     let env = FakeEnv::new();
     create_credential(&env).expect("create credential");
     create_user(&env).expect("create user error");
+    sign_in(&env).expect("sign in");
     create_bookmark(&env).expect("create bookmark");
     list_bookmarks(&env).expect("list bookmarks");
     update_bookmark(&env).expect("update bookmark");
