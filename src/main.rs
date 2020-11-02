@@ -11,6 +11,7 @@ use crate::use_case::create_credential_use_case::{
 };
 use crate::use_case::create_user_use_case::{CreateUserUseCase, UseCreateUserUseCase};
 use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
+use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
@@ -72,6 +73,10 @@ fn update_password_by_secret<T: UseUpdatePasswordBySecretUseCase>(_: &T) -> Resu
     todo!()
 }
 
+fn delete_user<T: UseDeleteUserUseCase>(_: &T) -> Result<()> {
+    todo!()
+}
+
 fn main() {
     let env = FakeEnv::new();
     create_credential(&env).expect("create credential");
@@ -85,4 +90,5 @@ fn main() {
     update_password(&env).expect("update password");
     reset_password(&env).expect("reset password");
     update_password_by_secret(&env).expect("update password by secret");
+    delete_user(&env).expect("delete user");
 }

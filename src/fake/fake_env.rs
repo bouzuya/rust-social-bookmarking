@@ -12,6 +12,7 @@ use crate::use_case::create_bookmark_use_case::UseCreateBookmarkUseCase;
 use crate::use_case::create_credential_use_case::UseCreateCredentialUseCase;
 use crate::use_case::create_user_use_case::UseCreateUserUseCase;
 use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
+use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
@@ -105,6 +106,13 @@ impl UseCreateUserUseCase for FakeEnv {
 impl UseDeleteBookmarkUseCase for FakeEnv {
   type DeleteBookmarkUseCase = Self;
   fn delete_bookmark_use_case(&self) -> &Self::DeleteBookmarkUseCase {
+    self
+  }
+}
+
+impl UseDeleteUserUseCase for FakeEnv {
+  type DeleteUserUseCase = Self;
+  fn delete_user_use_case(&self) -> &Self::DeleteUserUseCase {
     self
   }
 }
