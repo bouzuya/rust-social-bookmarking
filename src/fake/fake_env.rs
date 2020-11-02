@@ -11,6 +11,7 @@ use crate::service::session_service::UseSessionService;
 use crate::use_case::create_bookmark_use_case::UseCreateBookmarkUseCase;
 use crate::use_case::create_credential_use_case::UseCreateCredentialUseCase;
 use crate::use_case::create_user_use_case::UseCreateUserUseCase;
+use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
 
 pub struct FakeEnv {
@@ -91,6 +92,13 @@ impl UseCreateCredentialUseCase for FakeEnv {
 impl UseCreateUserUseCase for FakeEnv {
   type CreateUserUseCase = Self;
   fn create_user_use_case(&self) -> &Self::CreateUserUseCase {
+    self
+  }
+}
+
+impl UseDeleteBookmarkUseCase for FakeEnv {
+  type DeleteBookmarkUseCase = Self;
+  fn delete_bookmark_use_case(&self) -> &Self::DeleteBookmarkUseCase {
     self
   }
 }
