@@ -12,6 +12,7 @@ use crate::use_case::create_credential_use_case::{
 use crate::use_case::create_user_use_case::{CreateUserUseCase, UseCreateUserUseCase};
 use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
+use crate::use_case::get_current_user_use_case::UseGetCurrentUserUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::sign_in_use_case::UseSignInUseCase;
@@ -36,6 +37,10 @@ fn create_user<T: UseCreateUserUseCase>(env: &T) -> Result<()> {
 }
 
 fn sign_in<T: UseSignInUseCase>(_: &T) -> Result<()> {
+    todo!()
+}
+
+fn get_current_user<T: UseGetCurrentUserUseCase>(_: &T) -> Result<()> {
     todo!()
 }
 
@@ -92,6 +97,7 @@ fn main() {
     create_credential(&env).expect("create credential");
     create_user(&env).expect("create user error");
     sign_in(&env).expect("sign in");
+    get_current_user(&env).expect("get current user error");
     create_bookmark(&env).expect("create bookmark");
     list_bookmarks(&env).expect("list bookmarks");
     update_bookmark(&env).expect("update bookmark");
