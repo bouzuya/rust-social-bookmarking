@@ -15,6 +15,7 @@ use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
 use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
+use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
 use crate::use_case::update_password_use_case::UseUpdatePasswordUseCase;
 use crate::use_case::verify_mail_address_use_case::UseVerifyMailAddressUseCase;
 
@@ -124,6 +125,13 @@ impl UseUpdateBookmarkUseCase for FakeEnv {
 impl UseUpdateMailAddressUseCase for FakeEnv {
   type UpdateMailAddressUseCase = Self;
   fn update_mail_address_use_case(&self) -> &Self::UpdateMailAddressUseCase {
+    self
+  }
+}
+
+impl UseUpdatePasswordBySecretUseCase for FakeEnv {
+  type UpdatePasswordBySecretUseCase = Self;
+  fn update_password_by_secret_use_case(&self) -> &Self::UpdatePasswordBySecretUseCase {
     self
   }
 }

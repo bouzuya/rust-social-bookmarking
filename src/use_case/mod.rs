@@ -5,5 +5,6 @@ pub mod delete_bookmark_use_case;
 pub mod list_bookmarks_use_case;
 pub mod update_bookmark_use_case;
 pub mod update_mail_address_use_case;
+pub mod update_password_by_secret_use_case;
 pub mod update_password_use_case;
 pub mod verify_mail_address_use_case;
