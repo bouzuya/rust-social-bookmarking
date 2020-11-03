@@ -4,6 +4,7 @@ use crate::entity::bookmark_title::BookmarkTitle;
 use crate::entity::bookmark_url::BookmarkUrl;
 use crate::entity::user_id::UserId;
 
+#[derive(Debug)]
 pub struct Bookmark {
   pub id: BookmarkId,
   pub user_id: UserId,
