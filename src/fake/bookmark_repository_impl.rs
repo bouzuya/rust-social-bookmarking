@@ -1,6 +1,7 @@
 use crate::entity::bookmark::Bookmark;
 use crate::entity::bookmark_comment::BookmarkComment;
 use crate::entity::bookmark_id::BookmarkId;
+use crate::entity::bookmark_key::BookmarkKey;
 use crate::entity::bookmark_title::BookmarkTitle;
 use crate::entity::bookmark_url::BookmarkUrl;
 use crate::entity::user_id::UserId;
@@ -36,7 +37,15 @@ impl BookmarkRepository for BookmarkRepositoryImpl {
     Ok(bookmark)
   }
 
+  fn find_by_key(&self, _: &BookmarkKey) -> Result<Option<Bookmark>> {
+    todo!()
+  }
+
   fn find_by_user_key(&self, _: &UserKey) -> Result<Vec<Bookmark>> {
+    todo!()
+  }
+
+  fn save(&self, _: &Bookmark) -> Result<()> {
     todo!()
   }
 }

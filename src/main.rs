@@ -15,7 +15,7 @@ use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::sign_in_use_case::{SignInUseCase, UseSignInUseCase};
 use crate::use_case::sign_out_use_case::UseSignOutUseCase;
 use crate::use_case::sign_up_use_case::{SignUpUseCase, UseSignUpUseCase};
-use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
+use crate::use_case::update_bookmark_use_case::{UpdateBookmarkUseCase, UseUpdateBookmarkUseCase};
 use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
 use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
 use crate::use_case::update_password_use_case::UseUpdatePasswordUseCase;
@@ -75,8 +75,17 @@ fn sign_up<T: UseSignUpUseCase>(env: &T) -> Result<()> {
     env.sign_up_use_case().sign_up(mail_address, password)
 }
 
-fn update_bookmark<T: UseUpdateBookmarkUseCase>(_: &T) -> Result<()> {
-    todo!()
+fn update_bookmark<T: UseUpdateBookmarkUseCase>(env: &T) -> Result<()> {
+    let bookmark_key = "1234567890123456".parse().unwrap();
+    let bookmark_url = "https://bouzuya.net".parse().unwrap();
+    let bookmark_title = "bouzuya.net".parse().unwrap();
+    let bookmark_comment = "bouzuya's website".parse().unwrap();
+    env.update_bookmark_use_case().update_bookmark(
+        bookmark_key,
+        bookmark_url,
+        bookmark_title,
+        bookmark_comment,
+    )
 }
 
 fn update_mail_address<T: UseUpdateMailAddressUseCase>(_: &T) -> Result<()> {

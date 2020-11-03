@@ -3,6 +3,7 @@ use crate::entity::bookmark_id::BookmarkId;
 use crate::entity::bookmark_title::BookmarkTitle;
 use crate::entity::bookmark_url::BookmarkUrl;
 use crate::entity::user_id::UserId;
+use anyhow::Result;
 
 #[derive(Debug)]
 pub struct Bookmark {
@@ -28,5 +29,18 @@ impl Bookmark {
       title,
       comment,
     }
+  }
+
+  pub fn user_id(&self) -> UserId {
+    self.user_id
+  }
+
+  pub fn update(
+    &self,
+    url: BookmarkUrl,
+    title: BookmarkTitle,
+    comment: BookmarkComment,
+  ) -> Result<Bookmark> {
+    Ok(Self::new(self.id, self.user_id, url, title, comment))
   }
 }
