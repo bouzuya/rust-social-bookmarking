@@ -13,9 +13,9 @@ pub trait DeleteBookmarkUseCase: UseBookmarkRepository + UseSessionService {
         match self.session_service().get_current_user()? {
             None => Err(anyhow!("unauthorized")),
             Some(current_user) => match self.bookmark_repository().find_by_key(&bookmark_key)? {
-                None => Err(anyhow!("no bookmark")),
+                None => Err(anyhow!("not found")),
                 Some(bookmark) if bookmark.user_id() != current_user.id() => {
-                    Err(anyhow!("other user's bookmark"))
+                    Err(anyhow!("forbidden"))
                 }
                 Some(bookmark) => self.bookmark_repository().delete(&bookmark.id()),
             },

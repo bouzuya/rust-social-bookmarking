@@ -13,8 +13,9 @@ pub trait VerifyMailAddressUseCase: UseCredentialRepository {
             .credential_repository()
             .find_by_verify_user_secret(&secret)?
         {
-            None => Err(anyhow!("no credential")),
+            None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
+                // TODO: check expired
                 let verified = credential.verify(&secret)?;
                 self.credential_repository().save(&verified)?;
                 credential.user_id();

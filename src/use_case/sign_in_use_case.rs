@@ -16,16 +16,16 @@ pub trait SignInUseCase: UseCredentialRepository + UseUserRepository + UseSessio
             .credential_repository()
             .find_by_mail_address(mail_address)?
         {
-            None => Err(anyhow!("credential not found")),
+            None => Err(anyhow!("unauthorized")),
             Some(credential) => {
                 if &credential.password() != password {
-                    Err(anyhow!("credential not found"))
+                    Err(anyhow!("unauthorized"))
                 } else {
                     match self
                         .user_repository()
                         .find_by_credential_id(&credential.id())?
                     {
-                        None => Err(anyhow!("user not found")),
+                        None => Err(anyhow!("not found")),
                         Some(user) => self.session_service().set_current_user(Some(user)),
                     }
                 }

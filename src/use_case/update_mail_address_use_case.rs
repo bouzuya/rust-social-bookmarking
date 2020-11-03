@@ -24,7 +24,7 @@ pub trait UpdateMailAddressUseCase:
                     .filter(|c| c.verification().is_none())
                     .nth(0)
                 {
-                    None => Err(anyhow!("no verified credential")),
+                    None => unreachable!(),
                     Some(verified) => {
                         let new_credential = self.credential_repository().create(
                             current_user.id(),

@@ -18,11 +18,11 @@ pub trait CreateUserUseCase:
             .credential_repository()
             .find_by_verify_user_secret(&verify_user_secret)?
         {
-            None => Err(anyhow!("invalid secret")),
+            None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
                 let verification = credential.verification().unwrap();
                 if verification.expired() {
-                    Err(anyhow!("invalid secret"))
+                    Err(anyhow!("forbidden: invalid secret"))
                 } else {
                     let verified = credential.verify(&verify_user_secret)?;
                     let user = User::new(verified.user_id());

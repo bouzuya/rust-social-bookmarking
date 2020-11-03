@@ -18,8 +18,9 @@ pub trait UpdatePasswordBySecretUseCase: UseCredentialRepository {
             .credential_repository()
             .find_by_verify_user_secret(&secret)?
         {
-            None => Err(anyhow!("no credential")),
+            None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
+                // TODO: check expired
                 let updated = credential.update_password(password)?;
                 self.credential_repository().save(&updated)
             }
