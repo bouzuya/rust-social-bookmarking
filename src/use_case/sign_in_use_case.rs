@@ -26,7 +26,7 @@ pub trait SignInUseCase: UseCredentialRepository + UseUserRepository + UseSessio
                         .find_by_credential_id(&credential.id())?
                     {
                         None => Err(anyhow!("user not found")),
-                        Some(user) => self.session_service().set_current_user(user),
+                        Some(user) => self.session_service().set_current_user(Some(user)),
                     }
                 }
             }

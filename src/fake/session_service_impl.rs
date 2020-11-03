@@ -15,7 +15,7 @@ impl SessionService for SessionServiceImpl {
     todo!()
   }
 
-  fn set_current_user(&self, _: User) -> Result<()> {
+  fn set_current_user(&self, _: Option<User>) -> Result<()> {
     todo!()
   }
 }

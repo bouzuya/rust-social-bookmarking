@@ -1,3 +1,4 @@
+use crate::service::session_service::{SessionService, UseSessionService};
 use anyhow::Result;
 
 pub trait UseSignOutUseCase {
@@ -5,10 +6,10 @@ pub trait UseSignOutUseCase {
     fn sign_out_use_case(&self) -> &Self::SignOutUseCase;
 }
 
-pub trait SignOutUseCase {
+pub trait SignOutUseCase: UseSessionService {
     fn sign_out(&self) -> Result<()> {
-        todo!()
+        self.session_service().set_current_user(None)
     }
 }
 
-impl<T> SignOutUseCase for T {}
+impl<T: UseSessionService> SignOutUseCase for T {}
