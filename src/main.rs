@@ -16,7 +16,9 @@ use crate::use_case::sign_in_use_case::{SignInUseCase, UseSignInUseCase};
 use crate::use_case::sign_out_use_case::UseSignOutUseCase;
 use crate::use_case::sign_up_use_case::{SignUpUseCase, UseSignUpUseCase};
 use crate::use_case::update_bookmark_use_case::{UpdateBookmarkUseCase, UseUpdateBookmarkUseCase};
-use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
+use crate::use_case::update_mail_address_use_case::{
+    UpdateMailAddressUseCase, UseUpdateMailAddressUseCase,
+};
 use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
 use crate::use_case::update_password_use_case::UseUpdatePasswordUseCase;
 use crate::use_case::verify_mail_address_use_case::UseVerifyMailAddressUseCase;
@@ -90,8 +92,10 @@ fn update_bookmark<T: UseUpdateBookmarkUseCase>(env: &T) -> Result<()> {
     )
 }
 
-fn update_mail_address<T: UseUpdateMailAddressUseCase>(_: &T) -> Result<()> {
-    todo!()
+fn update_mail_address<T: UseUpdateMailAddressUseCase>(env: &T) -> Result<()> {
+    let mail_address = "m2@bouzuya.net".parse().unwrap();
+    env.update_mail_address_use_case()
+        .update_mail_address(&mail_address)
 }
 
 fn update_password<T: UseUpdatePasswordUseCase>(_: &T) -> Result<()> {

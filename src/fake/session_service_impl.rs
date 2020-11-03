@@ -20,7 +20,7 @@ impl SessionService for SessionServiceImpl {
     let credential_id = CredentialId::try_from(1).unwrap();
     let mail_address = "m@bouzuya.net".parse().unwrap();
     let password = "password".parse().unwrap();
-    let credential = Credential::new(credential_id, mail_address, password);
+    let credential = Credential::new(credential_id, &mail_address, &password);
     let user = User::new(user_id, &credential);
     Ok(Some(user))
   }

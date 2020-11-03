@@ -11,12 +11,13 @@ pub trait UseCredentialRepository {
 }
 
 pub trait CredentialRepository {
+  fn find_by_id(&self, id: &CredentialId) -> Result<Option<Credential>>;
   fn find_by_mail_address(&self, mail_address: &MailAddress) -> Result<Option<Credential>>;
   fn find_by_verify_user_secret(
     &self,
     verify_user_secret: &VerifyUserSecret,
   ) -> Result<Option<Credential>>;
-  fn create(&self, mail_address: MailAddress, password: Password) -> Result<Credential>;
+  fn create(&self, mail_address: &MailAddress, password: &Password) -> Result<Credential>;
   fn delete(&self, credential_id: &CredentialId) -> Result<()>;
   fn save(&self, credential: Credential) -> Result<()>;
 }

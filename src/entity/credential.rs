@@ -13,11 +13,11 @@ pub struct Credential {
 }
 
 impl Credential {
-    pub fn new(id: CredentialId, mail_address: MailAddress, password: Password) -> Self {
+    pub fn new(id: CredentialId, mail_address: &MailAddress, password: &Password) -> Self {
         Self {
             id,
-            mail_address,
-            password,
+            mail_address: mail_address.clone(),
+            password: password.clone(),
             verification: Some(CredentialVerification::new()),
         }
     }

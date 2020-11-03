@@ -22,7 +22,7 @@ pub trait SignUpUseCase: UseCredentialRepository + UseSendMailService {
         }
         let credential = self
             .credential_repository()
-            .create(mail_address, password)?;
+            .create(&mail_address, &password)?;
         self.send_mail_service().send_create_user_mail(&credential);
         Ok(())
     }

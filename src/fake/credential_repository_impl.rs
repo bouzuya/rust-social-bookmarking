@@ -18,11 +18,15 @@ impl CredentialRepositoryImpl {
 }
 
 impl CredentialRepository for CredentialRepositoryImpl {
-  fn create(&self, mail_address: MailAddress, password: Password) -> Result<Credential> {
+  fn create(&self, mail_address: &MailAddress, password: &Password) -> Result<Credential> {
     println!("CredentialRepository#create");
     let credential_id = 1.try_into().unwrap();
     let credential = Credential::new(credential_id, mail_address, password);
     Ok(credential)
+  }
+
+  fn find_by_id(&self, _: &CredentialId) -> Result<Option<Credential>> {
+    todo!()
   }
 
   fn find_by_mail_address(&self, mail_address: &MailAddress) -> Result<Option<Credential>> {
