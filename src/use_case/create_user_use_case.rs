@@ -1,3 +1,4 @@
+use crate::entity::user::User;
 use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
 use crate::repository::user_repository::{UseUserRepository, UserRepository};
@@ -24,7 +25,8 @@ pub trait CreateUserUseCase:
                     Err(anyhow!("invalid secret"))
                 } else {
                     let verified = credential.verify(&verify_user_secret)?;
-                    let user = self.user_repository().create(&credential)?;
+                    let user = User::new(verified.user_id());
+                    self.user_repository().create(&user)?;
                     self.credential_repository().save(verified)?;
 
                     self.send_mail_service()

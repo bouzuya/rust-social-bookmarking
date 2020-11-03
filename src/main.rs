@@ -21,7 +21,9 @@ use crate::use_case::update_mail_address_use_case::{
 };
 use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
 use crate::use_case::update_password_use_case::UseUpdatePasswordUseCase;
-use crate::use_case::verify_mail_address_use_case::UseVerifyMailAddressUseCase;
+use crate::use_case::verify_mail_address_use_case::{
+    UseVerifyMailAddressUseCase, VerifyMailAddressUseCase,
+};
 use anyhow::Result;
 
 fn create_bookmark<T: UseCreateBookmarkUseCase>(env: &T) -> Result<()> {
@@ -106,8 +108,10 @@ fn update_password_by_secret<T: UseUpdatePasswordBySecretUseCase>(_: &T) -> Resu
     todo!()
 }
 
-fn verify_mail_address<T: UseVerifyMailAddressUseCase>(_: &T) -> Result<()> {
-    todo!()
+fn verify_mail_address<T: UseVerifyMailAddressUseCase>(env: &T) -> Result<()> {
+    let verify_user_secret = "1".repeat(255).parse().unwrap();
+    env.verify_mail_address_use_case()
+        .verify_mail_address(&verify_user_secret)
 }
 
 fn main() {

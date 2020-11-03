@@ -16,15 +16,21 @@ pub trait UpdateMailAddressUseCase:
         match self.session_service().get_current_user()? {
             None => Err(anyhow!("no current user")),
             Some(current_user) => {
-                match self
+                let credentials = self
                     .credential_repository()
-                    .find_by_id(&current_user.credential_id())?
+                    .find_by_user_id(&current_user.id())?;
+                match credentials
+                    .into_iter()
+                    .filter(|c| c.verification().is_none())
+                    .nth(0)
                 {
-                    None => Err(anyhow!("no credential")),
-                    Some(credential) => {
-                        let new_credential = self
-                            .credential_repository()
-                            .create(&mail_address, &credential.password())?;
+                    None => Err(anyhow!("no verified credential")),
+                    Some(verified) => {
+                        let new_credential = self.credential_repository().create(
+                            current_user.id(),
+                            &mail_address,
+                            &verified.password(),
+                        )?;
                         self.send_mail_service()
                             .send_verify_mail_address_mail(&new_credential);
                         Ok(())

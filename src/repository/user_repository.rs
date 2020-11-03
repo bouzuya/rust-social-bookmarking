@@ -1,6 +1,6 @@
-use crate::entity::credential::Credential;
 use crate::entity::credential_id::CredentialId;
 use crate::entity::user::User;
+use crate::entity::user_id::UserId;
 use anyhow::Result;
 
 pub trait UseUserRepository {
@@ -9,6 +9,7 @@ pub trait UseUserRepository {
 }
 
 pub trait UserRepository {
-    fn create(&self, credential: &Credential) -> Result<User>;
+    fn create(&self, user: &User) -> Result<()>;
+    fn create_id(&self) -> Result<UserId>;
     fn find_by_credential_id(&self, _: &CredentialId) -> Result<Option<User>>;
 }
