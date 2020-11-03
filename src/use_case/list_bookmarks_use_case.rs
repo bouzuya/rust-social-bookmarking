@@ -12,7 +12,7 @@ pub trait ListBookmarksUseCase: UseBookmarkRepository + UseSessionService {
     // TODO: list_bookmarks -> list_current_user_bookmarks
     fn list_bookmarks(&self) -> Result<Vec<Bookmark>> {
         match self.session_service().get_current_user()? {
-            None => Err(anyhow!("no current user")),
+            None => Err(anyhow!("unauthorized")),
             Some(current_user) => self
                 .bookmark_repository()
                 .find_by_user_id(&current_user.id()),

@@ -18,7 +18,7 @@ pub trait CreateBookmarkUseCase: UseBookmarkRepository + UseSessionService {
         comment: BookmarkComment,
     ) -> Result<()> {
         return match self.session_service().get_current_user()? {
-            None => Err(anyhow!("no current user")),
+            None => Err(anyhow!("unauthorized")),
             Some(current_user) => {
                 self.bookmark_repository()
                     .create(current_user.id(), url, title, comment)?;

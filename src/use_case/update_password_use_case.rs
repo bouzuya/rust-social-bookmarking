@@ -11,7 +11,7 @@ pub trait UseUpdatePasswordUseCase {
 pub trait UpdatePasswordUseCase: UseCredentialRepository + UseSessionService {
     fn update_password(&self, password: &Password) -> Result<()> {
         match self.session_service().get_current_user()? {
-            None => Err(anyhow!("no current user")),
+            None => Err(anyhow!("unauthorized")),
             Some(current_user) => {
                 let credentials = self
                     .credential_repository()

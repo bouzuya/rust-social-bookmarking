@@ -14,7 +14,7 @@ pub trait UpdateMailAddressUseCase:
 {
     fn update_mail_address(&self, mail_address: &MailAddress) -> Result<()> {
         match self.session_service().get_current_user()? {
-            None => Err(anyhow!("no current user")),
+            None => Err(anyhow!("unauthorized")),
             Some(current_user) => {
                 let credentials = self
                     .credential_repository()

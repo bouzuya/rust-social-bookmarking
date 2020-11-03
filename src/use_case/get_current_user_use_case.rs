@@ -9,8 +9,7 @@ pub trait UseGetCurrentUserUseCase {
 
 pub trait GetCurrentUserUseCase: UseSessionService {
     fn get_current_user(&self) -> Result<Option<User>> {
-        let current_user = self.session_service().get_current_user()?;
-        Ok(current_user)
+        self.session_service().get_current_user()
     }
 }
 

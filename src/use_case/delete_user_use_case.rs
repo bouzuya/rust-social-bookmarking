@@ -11,7 +11,7 @@ pub trait UseDeleteUserUseCase {
 pub trait DeleteUserUseCase: UseSessionService + UseUserRepository {
     fn delete_user(&self, user_key: &UserKey) -> Result<()> {
         match self.session_service().get_current_user()? {
-            None => Err(anyhow!("no current user")),
+            None => Err(anyhow!("unauthorized")),
             Some(current_user) if &current_user.key() != user_key => {
                 Err(anyhow!("unauthorized: other user"))
             }
