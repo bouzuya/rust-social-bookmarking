@@ -1,5 +1,6 @@
 use crate::entity::bookmark::Bookmark;
 use crate::entity::bookmark_comment::BookmarkComment;
+use crate::entity::bookmark_id::BookmarkId;
 use crate::entity::bookmark_key::BookmarkKey;
 use crate::entity::bookmark_title::BookmarkTitle;
 use crate::entity::bookmark_url::BookmarkUrl;
@@ -20,6 +21,8 @@ pub trait BookmarkRepository {
     title: BookmarkTitle,
     comment: BookmarkComment,
   ) -> Result<Bookmark>;
+
+  fn delete(&self, _: &BookmarkId) -> Result<()>;
 
   fn find_by_key(&self, _: &BookmarkKey) -> Result<Option<Bookmark>>;
 

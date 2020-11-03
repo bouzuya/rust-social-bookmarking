@@ -7,7 +7,7 @@ mod use_case;
 use crate::fake::fake_env::FakeEnv;
 use crate::use_case::create_bookmark_use_case::{CreateBookmarkUseCase, UseCreateBookmarkUseCase};
 use crate::use_case::create_user_use_case::{CreateUserUseCase, UseCreateUserUseCase};
-use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
+use crate::use_case::delete_bookmark_use_case::{DeleteBookmarkUseCase, UseDeleteBookmarkUseCase};
 use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
 use crate::use_case::get_current_user_use_case::{GetCurrentUserUseCase, UseGetCurrentUserUseCase};
 use crate::use_case::list_bookmarks_use_case::{ListBookmarksUseCase, UseListBookmarksUseCase};
@@ -35,8 +35,10 @@ fn create_user<T: UseCreateUserUseCase>(env: &T) -> Result<()> {
     env.create_user_use_case().create_user(verify_user_secret)
 }
 
-fn delete_bookmark<T: UseDeleteBookmarkUseCase>(_: &T) -> Result<()> {
-    todo!()
+fn delete_bookmark<T: UseDeleteBookmarkUseCase>(env: &T) -> Result<()> {
+    let bookmark_key = "1234567890123456".parse().unwrap();
+    env.delete_bookmark_use_case()
+        .delete_bookmark(&bookmark_key)
 }
 
 fn delete_user<T: UseDeleteUserUseCase>(_: &T) -> Result<()> {

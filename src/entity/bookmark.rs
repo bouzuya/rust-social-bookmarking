@@ -31,6 +31,10 @@ impl Bookmark {
     }
   }
 
+  pub fn id(&self) -> BookmarkId {
+    self.id
+  }
+
   pub fn user_id(&self) -> UserId {
     self.user_id
   }

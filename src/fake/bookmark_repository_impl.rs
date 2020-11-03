@@ -37,6 +37,10 @@ impl BookmarkRepository for BookmarkRepositoryImpl {
     Ok(bookmark)
   }
 
+  fn delete(&self, _: &BookmarkId) -> Result<()> {
+    todo!()
+  }
+
   fn find_by_key(&self, _: &BookmarkKey) -> Result<Option<Bookmark>> {
     todo!()
   }
