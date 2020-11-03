@@ -2,7 +2,7 @@ use crate::entity::credential_verification_expired_at::CredentialVerificationExp
 use crate::entity::verify_user_secret::VerifyUserSecret;
 use anyhow::{anyhow, Result};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CredentialVerification {
     expired_at: CredentialVerificationExpiredAt,
     secret: VerifyUserSecret, // TODO: rename

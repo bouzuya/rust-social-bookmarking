@@ -6,6 +6,7 @@ use crate::entity::user_id::UserId;
 use crate::entity::verify_user_secret::VerifyUserSecret;
 use anyhow::{anyhow, Result};
 
+#[derive(Debug)]
 pub struct Credential {
     id: CredentialId,
     user_id: UserId,

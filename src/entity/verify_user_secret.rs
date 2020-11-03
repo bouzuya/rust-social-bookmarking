@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 use std::str::FromStr;
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VerifyUserSecret(String);
 
 impl VerifyUserSecret {
