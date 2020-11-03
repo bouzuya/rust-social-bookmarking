@@ -21,6 +21,11 @@ impl UserRepository for UserRepositoryImpl {
         todo!()
     }
 
+    fn delete(&self, _: &UserId) -> Result<()> {
+        // TODO: delete all bookmarks
+        todo!()
+    }
+
     fn find_by_credential_id(&self, _: &CredentialId) -> Result<Option<User>> {
         todo!();
     }
