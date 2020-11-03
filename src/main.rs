@@ -20,7 +20,7 @@ use crate::use_case::update_mail_address_use_case::{
     UpdateMailAddressUseCase, UseUpdateMailAddressUseCase,
 };
 use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
-use crate::use_case::update_password_use_case::UseUpdatePasswordUseCase;
+use crate::use_case::update_password_use_case::{UpdatePasswordUseCase, UseUpdatePasswordUseCase};
 use crate::use_case::verify_mail_address_use_case::{
     UseVerifyMailAddressUseCase, VerifyMailAddressUseCase,
 };
@@ -100,8 +100,9 @@ fn update_mail_address<T: UseUpdateMailAddressUseCase>(env: &T) -> Result<()> {
         .update_mail_address(&mail_address)
 }
 
-fn update_password<T: UseUpdatePasswordUseCase>(_: &T) -> Result<()> {
-    todo!()
+fn update_password<T: UseUpdatePasswordUseCase>(env: &T) -> Result<()> {
+    let password = "password1".parse().unwrap();
+    env.update_password_use_case().update_password(&password)
 }
 
 fn update_password_by_secret<T: UseUpdatePasswordBySecretUseCase>(_: &T) -> Result<()> {
