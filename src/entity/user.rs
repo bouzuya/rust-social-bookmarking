@@ -3,7 +3,7 @@ use crate::entity::credential_id::CredentialId;
 use crate::entity::user_id::UserId;
 use crate::entity::user_key::UserKey;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct User {
     id: UserId,
     key: UserKey,

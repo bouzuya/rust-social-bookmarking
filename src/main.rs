@@ -9,7 +9,7 @@ use crate::use_case::create_bookmark_use_case::{CreateBookmarkUseCase, UseCreate
 use crate::use_case::create_user_use_case::{CreateUserUseCase, UseCreateUserUseCase};
 use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
-use crate::use_case::get_current_user_use_case::UseGetCurrentUserUseCase;
+use crate::use_case::get_current_user_use_case::{GetCurrentUserUseCase, UseGetCurrentUserUseCase};
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::sign_in_use_case::{SignInUseCase, UseSignInUseCase};
@@ -43,8 +43,10 @@ fn delete_user<T: UseDeleteUserUseCase>(_: &T) -> Result<()> {
     todo!()
 }
 
-fn get_current_user<T: UseGetCurrentUserUseCase>(_: &T) -> Result<()> {
-    todo!()
+fn get_current_user<T: UseGetCurrentUserUseCase>(env: &T) -> Result<()> {
+    let current_user = env.get_current_user_use_case().get_current_user()?;
+    println!("{:?}", current_user);
+    Ok(())
 }
 
 fn list_bookmarks<T: UseListBookmarksUseCase>(_: &T) -> Result<()> {
