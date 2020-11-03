@@ -9,10 +9,6 @@ impl BookmarkKey {
         // TODO: generate key
         Self("123456789012".into())
     }
-
-    pub fn to_string(&self) -> String {
-        self.0.to_owned()
-    }
 }
 
 impl TryFrom<&str> for BookmarkKey {

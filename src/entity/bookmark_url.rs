@@ -4,12 +4,6 @@ use std::str::FromStr;
 #[derive(Clone, Debug)]
 pub struct BookmarkUrl(String);
 
-impl BookmarkUrl {
-    pub fn to_string(&self) -> String {
-        self.0.to_owned()
-    }
-}
-
 impl TryFrom<&str> for BookmarkUrl {
     type Error = &'static str;
     fn try_from(s: &str) -> Result<Self, <Self as TryFrom<&str>>::Error> {

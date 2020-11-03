@@ -4,12 +4,6 @@ use std::str::FromStr;
 #[derive(Clone, Debug)]
 pub struct MailAddress(String);
 
-impl MailAddress {
-    pub fn to_string(&self) -> String {
-        self.0.to_owned()
-    }
-}
-
 impl TryFrom<&str> for MailAddress {
     type Error = &'static str;
     fn try_from(s: &str) -> Result<Self, <Self as TryFrom<&str>>::Error> {

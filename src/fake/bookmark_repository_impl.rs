@@ -31,9 +31,9 @@ impl BookmarkRepository for BookmarkRepositoryImpl {
     let bookmark = Bookmark::new(bookmark_id, user_id, url, title, comment);
     println!("  id     : {:?}", bookmark.id);
     println!("  user_id: {:?}", bookmark.user_id);
-    println!("  url    : {}", bookmark.url.to_string());
-    println!("  title  : {}", bookmark.title.to_string());
-    println!("  comment: {}", bookmark.comment.to_string());
+    println!("  url    : {:?}", bookmark.url);
+    println!("  title  : {:?}", bookmark.title);
+    println!("  comment: {:?}", bookmark.comment);
     Ok(bookmark)
   }
 

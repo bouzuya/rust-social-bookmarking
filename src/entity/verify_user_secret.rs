@@ -9,10 +9,6 @@ impl VerifyUserSecret {
         // TODO: generate secret
         VerifyUserSecret("1234567890".repeat(25) + "abcde")
     }
-
-    pub fn to_string(&self) -> String {
-        self.0.to_owned()
-    }
 }
 
 impl TryFrom<&str> for VerifyUserSecret {

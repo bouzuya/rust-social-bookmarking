@@ -4,12 +4,6 @@ use std::str::FromStr;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Password(String);
 
-impl Password {
-    pub fn to_string(&self) -> String {
-        self.0.to_owned()
-    }
-}
-
 impl TryFrom<&str> for Password {
     type Error = &'static str;
     fn try_from(s: &str) -> Result<Self, <Self as TryFrom<&str>>::Error> {
