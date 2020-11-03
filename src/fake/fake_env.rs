@@ -14,7 +14,7 @@ use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
 use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
 use crate::use_case::get_current_user_use_case::UseGetCurrentUserUseCase;
 use crate::use_case::list_bookmarks_by_user_key_use_case::UseListBookmarksByUserKeyUseCase;
-use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
+use crate::use_case::list_current_user_bookmarks_use_case::UseListCurrentUserBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
 use crate::use_case::sign_in_use_case::UseSignInUseCase;
 use crate::use_case::sign_out_use_case::UseSignOutUseCase;
@@ -121,16 +121,16 @@ impl UseGetCurrentUserUseCase for FakeEnv {
   }
 }
 
-impl UseListBookmarksUseCase for FakeEnv {
-  type ListBookmarksUseCase = Self;
-  fn list_bookmarks_use_case(&self) -> &Self::ListBookmarksUseCase {
+impl UseListBookmarksByUserKeyUseCase for FakeEnv {
+  type ListBookmarksByUserKeyUseCase = Self;
+  fn list_bookmarks_by_user_key_use_case(&self) -> &Self::ListBookmarksByUserKeyUseCase {
     self
   }
 }
 
-impl UseListBookmarksByUserKeyUseCase for FakeEnv {
-  type ListBookmarksByUserKeyUseCase = Self;
-  fn list_bookmarks_by_user_key_use_case(&self) -> &Self::ListBookmarksByUserKeyUseCase {
+impl UseListCurrentUserBookmarksUseCase for FakeEnv {
+  type ListBookmarksUseCase = Self;
+  fn list_current_user_bookmarks_use_case(&self) -> &Self::ListBookmarksUseCase {
     self
   }
 }

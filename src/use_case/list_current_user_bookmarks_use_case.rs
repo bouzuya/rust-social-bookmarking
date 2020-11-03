@@ -3,14 +3,13 @@ use crate::repository::bookmark_repository::{BookmarkRepository, UseBookmarkRepo
 use crate::service::session_service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};
 
-pub trait UseListBookmarksUseCase {
-    type ListBookmarksUseCase: ListBookmarksUseCase;
-    fn list_bookmarks_use_case(&self) -> &Self::ListBookmarksUseCase;
+pub trait UseListCurrentUserBookmarksUseCase {
+    type ListBookmarksUseCase: ListCurrentUserBookmarksUseCase;
+    fn list_current_user_bookmarks_use_case(&self) -> &Self::ListBookmarksUseCase;
 }
 
-pub trait ListBookmarksUseCase: UseBookmarkRepository + UseSessionService {
-    // TODO: list_bookmarks -> list_current_user_bookmarks
-    fn list_bookmarks(&self) -> Result<Vec<Bookmark>> {
+pub trait ListCurrentUserBookmarksUseCase: UseBookmarkRepository + UseSessionService {
+    fn list_current_user_bookmarks(&self) -> Result<Vec<Bookmark>> {
         match self.session_service().get_current_user()? {
             None => Err(anyhow!("unauthorized")),
             Some(current_user) => self
@@ -20,4 +19,4 @@ pub trait ListBookmarksUseCase: UseBookmarkRepository + UseSessionService {
     }
 }
 
-impl<T: UseBookmarkRepository + UseSessionService> ListBookmarksUseCase for T {}
+impl<T: UseBookmarkRepository + UseSessionService> ListCurrentUserBookmarksUseCase for T {}

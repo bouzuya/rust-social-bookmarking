@@ -18,6 +18,7 @@ pub trait VerifyMailAddressUseCase: UseCredentialRepository {
                 // TODO: check expired
                 let verified = credential.verify(&secret)?;
                 self.credential_repository().save(&verified)?;
+                // TODO: delete other credentials
                 credential.user_id();
                 Ok(())
             }
