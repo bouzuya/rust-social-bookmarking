@@ -5,7 +5,6 @@ use crate::entity::bookmark_key::BookmarkKey;
 use crate::entity::bookmark_title::BookmarkTitle;
 use crate::entity::bookmark_url::BookmarkUrl;
 use crate::entity::user_id::UserId;
-use crate::entity::user_key::UserKey;
 use crate::repository::bookmark_repository::BookmarkRepository;
 use anyhow::Result;
 use std::convert::TryFrom;
@@ -45,7 +44,7 @@ impl BookmarkRepository for BookmarkRepositoryImpl {
     todo!()
   }
 
-  fn find_by_user_key(&self, _: &UserKey) -> Result<Vec<Bookmark>> {
+  fn find_by_user_id(&self, _: &UserId) -> Result<Vec<Bookmark>> {
     todo!()
   }
 

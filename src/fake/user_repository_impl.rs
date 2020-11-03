@@ -1,6 +1,7 @@
 use crate::entity::credential_id::CredentialId;
 use crate::entity::user::User;
 use crate::entity::user_id::UserId;
+use crate::entity::user_key::UserKey;
 use crate::repository::user_repository::UserRepository;
 use anyhow::Result;
 
@@ -28,5 +29,9 @@ impl UserRepository for UserRepositoryImpl {
 
     fn find_by_credential_id(&self, _: &CredentialId) -> Result<Option<User>> {
         todo!();
+    }
+
+    fn find_by_user_key(&self, _: &UserKey) -> Result<Option<User>> {
+        todo!()
     }
 }

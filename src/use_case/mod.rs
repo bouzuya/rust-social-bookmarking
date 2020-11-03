@@ -3,6 +3,7 @@ pub mod create_user_use_case;
 pub mod delete_bookmark_use_case;
 pub mod delete_user_use_case;
 pub mod get_current_user_use_case;
+pub mod list_bookmarks_by_user_key_use_case;
 pub mod list_bookmarks_use_case;
 pub mod reset_password_use_case;
 pub mod sign_in_use_case;

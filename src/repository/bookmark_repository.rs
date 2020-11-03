@@ -5,7 +5,6 @@ use crate::entity::bookmark_key::BookmarkKey;
 use crate::entity::bookmark_title::BookmarkTitle;
 use crate::entity::bookmark_url::BookmarkUrl;
 use crate::entity::user_id::UserId;
-use crate::entity::user_key::UserKey;
 use anyhow::Result;
 
 pub trait UseBookmarkRepository {
@@ -26,7 +25,7 @@ pub trait BookmarkRepository {
 
   fn find_by_key(&self, _: &BookmarkKey) -> Result<Option<Bookmark>>;
 
-  fn find_by_user_key(&self, _: &UserKey) -> Result<Vec<Bookmark>>;
+  fn find_by_user_id(&self, _: &UserId) -> Result<Vec<Bookmark>>;
 
   fn save(&self, bookmark: &Bookmark) -> Result<()>;
 }

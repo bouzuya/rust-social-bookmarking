@@ -10,6 +10,9 @@ use crate::use_case::create_user_use_case::{CreateUserUseCase, UseCreateUserUseC
 use crate::use_case::delete_bookmark_use_case::{DeleteBookmarkUseCase, UseDeleteBookmarkUseCase};
 use crate::use_case::delete_user_use_case::{DeleteUserUseCase, UseDeleteUserUseCase};
 use crate::use_case::get_current_user_use_case::{GetCurrentUserUseCase, UseGetCurrentUserUseCase};
+use crate::use_case::list_bookmarks_by_user_key_use_case::{
+    ListBookmarksByUserKeyUseCase, UseListBookmarksByUserKeyUseCase,
+};
 use crate::use_case::list_bookmarks_use_case::{ListBookmarksUseCase, UseListBookmarksUseCase};
 use crate::use_case::reset_password_use_case::{ResetPasswordUseCase, UseResetPasswordUseCase};
 use crate::use_case::sign_in_use_case::{SignInUseCase, UseSignInUseCase};
@@ -60,6 +63,15 @@ fn get_current_user<T: UseGetCurrentUserUseCase>(env: &T) -> Result<()> {
 
 fn list_bookmarks<T: UseListBookmarksUseCase>(env: &T) -> Result<()> {
     let bookmarks = env.list_bookmarks_use_case().list_bookmarks()?;
+    println!("{:?}", bookmarks);
+    Ok(())
+}
+
+fn list_bookmarks_by_user_key<T: UseListBookmarksByUserKeyUseCase>(env: &T) -> Result<()> {
+    let user_key = "123456789012".parse().unwrap();
+    let bookmarks = env
+        .list_bookmarks_by_user_key_use_case()
+        .list_bookmarks_by_user_key(&user_key)?;
     println!("{:?}", bookmarks);
     Ok(())
 }
@@ -130,7 +142,7 @@ fn main() {
     get_current_user(&env).expect("get current user");
     create_bookmark(&env).expect("create bookmark");
     list_bookmarks(&env).expect("list bookmarks");
-    // TODO: add list_bookmarks_by_user_key
+    list_bookmarks_by_user_key(&env).expect("list bookmarks by user_key");
     update_bookmark(&env).expect("update bookmark");
     delete_bookmark(&env).expect("delete bookmark");
     update_mail_address(&env).expect("update mail_address");

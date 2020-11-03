@@ -39,6 +39,10 @@ impl Bookmark {
     self.user_id
   }
 
+  pub fn is_public(&self) -> bool {
+    todo!()
+  }
+
   pub fn update(
     &self,
     url: BookmarkUrl,

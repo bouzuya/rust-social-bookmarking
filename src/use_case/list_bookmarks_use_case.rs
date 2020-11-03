@@ -15,7 +15,7 @@ pub trait ListBookmarksUseCase: UseBookmarkRepository + UseSessionService {
             None => Err(anyhow!("no current user")),
             Some(current_user) => self
                 .bookmark_repository()
-                .find_by_user_key(&current_user.key()),
+                .find_by_user_id(&current_user.id()),
         }
     }
 }
