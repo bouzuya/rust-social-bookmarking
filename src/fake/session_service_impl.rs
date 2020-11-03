@@ -24,4 +24,8 @@ impl SessionService for SessionServiceImpl {
     let user = User::new(user_id, &credential);
     Ok(Some(user))
   }
+
+  fn set_current_user(&self, _: User) -> Result<()> {
+    todo!()
+  }
 }

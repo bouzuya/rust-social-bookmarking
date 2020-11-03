@@ -1,16 +1,37 @@
 use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
-use anyhow::Result;
+use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
+use crate::repository::user_repository::{UseUserRepository, UserRepository};
+use crate::service::session_service::{SessionService, UseSessionService};
+use anyhow::{anyhow, Result};
 
 pub trait UseSignInUseCase {
     type SignInUseCase: SignInUseCase;
     fn sign_in_use_case(&self) -> &Self::SignInUseCase;
 }
 
-pub trait SignInUseCase {
-    fn sign_in(&self, _: MailAddress, _: Password) -> Result<()> {
-        todo!()
+pub trait SignInUseCase: UseCredentialRepository + UseUserRepository + UseSessionService {
+    fn sign_in(&self, mail_address: &MailAddress, password: &Password) -> Result<()> {
+        match self
+            .credential_repository()
+            .find_by_mail_address(mail_address)?
+        {
+            None => Err(anyhow!("credential not found")),
+            Some(credential) => {
+                if &credential.password() != password {
+                    Err(anyhow!("credential not found"))
+                } else {
+                    match self
+                        .user_repository()
+                        .find_by_credential_id(&credential.id())?
+                    {
+                        None => Err(anyhow!("user not found")),
+                        Some(user) => self.session_service().set_current_user(user),
+                    }
+                }
+            }
+        }
     }
 }
 
-impl<T> SignInUseCase for T {}
+impl<T: UseCredentialRepository + UseUserRepository + UseSessionService> SignInUseCase for T {}

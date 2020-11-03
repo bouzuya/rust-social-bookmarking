@@ -12,7 +12,7 @@ use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
 use crate::use_case::get_current_user_use_case::UseGetCurrentUserUseCase;
 use crate::use_case::list_bookmarks_use_case::UseListBookmarksUseCase;
 use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
-use crate::use_case::sign_in_use_case::UseSignInUseCase;
+use crate::use_case::sign_in_use_case::{SignInUseCase, UseSignInUseCase};
 use crate::use_case::sign_out_use_case::UseSignOutUseCase;
 use crate::use_case::sign_up_use_case::{SignUpUseCase, UseSignUpUseCase};
 use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
@@ -55,8 +55,10 @@ fn reset_password<T: UseResetPasswordUseCase>(_: &T) -> Result<()> {
     todo!()
 }
 
-fn sign_in<T: UseSignInUseCase>(_: &T) -> Result<()> {
-    todo!()
+fn sign_in<T: UseSignInUseCase>(env: &T) -> Result<()> {
+    let mail_address = "m@bouzuya.net".parse().unwrap();
+    let password = "password".parse().unwrap();
+    env.sign_in_use_case().sign_in(&mail_address, &password)
 }
 
 fn sign_out<T: UseSignOutUseCase>(_: &T) -> Result<()> {
