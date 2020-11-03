@@ -67,6 +67,17 @@ impl Credential {
         self.verification.clone()
     }
 
+    pub fn reset_password(&self) -> Result<Self> {
+        Ok(Self {
+            id: self.id(),
+            user_id: self.user_id(),
+            mail_address: self.mail_address(),
+            password: self.password(),
+            verification: self.verification(),
+            // TODO: add reset password verification
+        })
+    }
+
     pub fn update_password(&self, password: &Password) -> Result<Self> {
         match &self.verification {
             Some(_) => Err(anyhow!("not verified")),

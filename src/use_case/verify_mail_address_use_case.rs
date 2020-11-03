@@ -16,7 +16,7 @@ pub trait VerifyMailAddressUseCase: UseCredentialRepository {
             None => Err(anyhow!("no credential")),
             Some(credential) => {
                 let verified = credential.verify(&secret)?;
-                self.credential_repository().save(verified)?;
+                self.credential_repository().save(&verified)?;
                 credential.user_id();
                 Ok(())
             }

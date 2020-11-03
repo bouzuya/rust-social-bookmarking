@@ -27,7 +27,7 @@ pub trait CreateUserUseCase:
                     let verified = credential.verify(&verify_user_secret)?;
                     let user = User::new(verified.user_id());
                     self.user_repository().create(&user)?;
-                    self.credential_repository().save(verified)?;
+                    self.credential_repository().save(&verified)?;
 
                     self.send_mail_service()
                         .send_user_verified_mail(&user, &credential);

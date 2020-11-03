@@ -24,7 +24,7 @@ pub trait UpdatePasswordUseCase: UseCredentialRepository + UseSessionService {
                     None => Err(anyhow!("no verified credential")),
                     Some(credential) => {
                         let updated = credential.update_password(&password)?;
-                        self.credential_repository().save(updated)
+                        self.credential_repository().save(&updated)
                     }
                 }
             }

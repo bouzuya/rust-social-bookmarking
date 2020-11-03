@@ -68,7 +68,7 @@ impl CredentialRepository for CredentialRepositoryImpl {
     Ok(())
   }
 
-  fn save(&self, _: Credential) -> Result<()> {
+  fn save(&self, _: &Credential) -> Result<()> {
     println!("CredentialRepository#save");
     Ok(())
   }

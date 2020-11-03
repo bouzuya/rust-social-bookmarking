@@ -22,6 +22,10 @@ impl SendMailService for SendMailServiceImpl {
         );
     }
 
+    fn send_update_password_mail(&self, _: &Credential) {
+        todo!()
+    }
+
     fn send_user_verified_mail(&self, user: &User, credential: &Credential) {
         println!("send user verified mail");
         println!("to: {:?}", credential.mail_address());

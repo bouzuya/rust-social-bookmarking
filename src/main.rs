@@ -11,7 +11,7 @@ use crate::use_case::delete_bookmark_use_case::{DeleteBookmarkUseCase, UseDelete
 use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
 use crate::use_case::get_current_user_use_case::{GetCurrentUserUseCase, UseGetCurrentUserUseCase};
 use crate::use_case::list_bookmarks_use_case::{ListBookmarksUseCase, UseListBookmarksUseCase};
-use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
+use crate::use_case::reset_password_use_case::{ResetPasswordUseCase, UseResetPasswordUseCase};
 use crate::use_case::sign_in_use_case::{SignInUseCase, UseSignInUseCase};
 use crate::use_case::sign_out_use_case::{SignOutUseCase, UseSignOutUseCase};
 use crate::use_case::sign_up_use_case::{SignUpUseCase, UseSignUpUseCase};
@@ -61,8 +61,9 @@ fn list_bookmarks<T: UseListBookmarksUseCase>(env: &T) -> Result<()> {
     Ok(())
 }
 
-fn reset_password<T: UseResetPasswordUseCase>(_: &T) -> Result<()> {
-    todo!()
+fn reset_password<T: UseResetPasswordUseCase>(env: &T) -> Result<()> {
+    let mail_address = "m@bouzuya.net".parse().unwrap();
+    env.reset_password_use_case().reset_password(&mail_address)
 }
 
 fn sign_in<T: UseSignInUseCase>(env: &T) -> Result<()> {
