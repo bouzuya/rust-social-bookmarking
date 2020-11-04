@@ -1,4 +1,4 @@
-use crate::entity::password::Password;
+use crate::entity::Password;
 use crate::repository::{CredentialRepository, UseCredentialRepository};
 use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};

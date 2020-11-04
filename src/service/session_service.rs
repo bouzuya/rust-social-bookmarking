@@ -1,4 +1,4 @@
-use crate::entity::user::User;
+use crate::entity::User;
 use anyhow::Result;
 
 pub trait UseSessionService {

@@ -1,5 +1,4 @@
-use crate::entity::bookmark::Bookmark;
-use crate::entity::user_key::UserKey;
+use crate::entity::{Bookmark, UserKey};
 use crate::repository::{
     BookmarkRepository, UseBookmarkRepository, UseUserRepository, UserRepository,
 };

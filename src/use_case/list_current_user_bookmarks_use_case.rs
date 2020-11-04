@@ -1,4 +1,4 @@
-use crate::entity::bookmark::Bookmark;
+use crate::entity::Bookmark;
 use crate::repository::{BookmarkRepository, UseBookmarkRepository};
 use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};

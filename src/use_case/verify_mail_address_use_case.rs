@@ -1,4 +1,4 @@
-use crate::entity::verify_user_secret::VerifyUserSecret;
+use crate::entity::VerifyUserSecret;
 use crate::repository::{CredentialRepository, UseCredentialRepository};
 use anyhow::{anyhow, Result};
 

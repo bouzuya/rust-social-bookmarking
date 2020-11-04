@@ -1,5 +1,4 @@
-use crate::entity::credential::Credential;
-use crate::entity::user::User;
+use crate::entity::{Credential, User};
 
 pub trait UseSendMailService {
     type SendMailService: SendMailService;

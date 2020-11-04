@@ -1,4 +1,4 @@
-use crate::entity::user_key::UserKey;
+use crate::entity::UserKey;
 use crate::repository::{UseUserRepository, UserRepository};
 use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};

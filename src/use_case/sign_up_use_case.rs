@@ -1,5 +1,4 @@
-use crate::entity::mail_address::MailAddress;
-use crate::entity::password::Password;
+use crate::entity::{MailAddress, Password};
 use crate::repository::{
     CredentialRepository, UseCredentialRepository, UseUserRepository, UserRepository,
 };

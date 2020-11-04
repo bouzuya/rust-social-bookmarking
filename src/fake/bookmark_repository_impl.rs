@@ -1,10 +1,6 @@
-use crate::entity::bookmark::Bookmark;
-use crate::entity::bookmark_comment::BookmarkComment;
-use crate::entity::bookmark_id::BookmarkId;
-use crate::entity::bookmark_key::BookmarkKey;
-use crate::entity::bookmark_title::BookmarkTitle;
-use crate::entity::bookmark_url::BookmarkUrl;
-use crate::entity::user_id::UserId;
+use crate::entity::{
+  Bookmark, BookmarkComment, BookmarkId, BookmarkKey, BookmarkTitle, BookmarkUrl, UserId,
+};
 use crate::repository::BookmarkRepository;
 use anyhow::Result;
 use std::convert::TryFrom;

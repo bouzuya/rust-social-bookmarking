@@ -1,11 +1,7 @@
-use crate::entity::credential::Credential;
-use crate::entity::credential_id::CredentialId;
-use crate::entity::credential_verification::CredentialVerification;
-use crate::entity::credential_verification_expired_at::CredentialVerificationExpiredAt;
-use crate::entity::mail_address::MailAddress;
-use crate::entity::password::Password;
-use crate::entity::user_id::UserId;
-use crate::entity::verify_user_secret::VerifyUserSecret;
+use crate::entity::{
+  Credential, CredentialId, CredentialVerification, CredentialVerificationExpiredAt, MailAddress,
+  Password, UserId, VerifyUserSecret,
+};
 use crate::repository::CredentialRepository;
 use anyhow::Result;
 use std::convert::TryInto;

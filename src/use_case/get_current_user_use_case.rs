@@ -1,4 +1,4 @@
-use crate::entity::user::User;
+use crate::entity::User;
 use crate::service::{SessionService, UseSessionService};
 use anyhow::Result;
 
