@@ -8,22 +8,7 @@ use crate::repository::credential_repository::UseCredentialRepository;
 use crate::repository::user_repository::UseUserRepository;
 use crate::service::send_mail_service::UseSendMailService;
 use crate::service::session_service::UseSessionService;
-use crate::use_case::create_bookmark_use_case::UseCreateBookmarkUseCase;
-use crate::use_case::create_user_use_case::UseCreateUserUseCase;
-use crate::use_case::delete_bookmark_use_case::UseDeleteBookmarkUseCase;
-use crate::use_case::delete_user_use_case::UseDeleteUserUseCase;
-use crate::use_case::get_current_user_use_case::UseGetCurrentUserUseCase;
-use crate::use_case::list_bookmarks_by_user_key_use_case::UseListBookmarksByUserKeyUseCase;
-use crate::use_case::list_current_user_bookmarks_use_case::UseListCurrentUserBookmarksUseCase;
-use crate::use_case::reset_password_use_case::UseResetPasswordUseCase;
-use crate::use_case::sign_in_use_case::UseSignInUseCase;
-use crate::use_case::sign_out_use_case::UseSignOutUseCase;
-use crate::use_case::sign_up_use_case::UseSignUpUseCase;
-use crate::use_case::update_bookmark_use_case::UseUpdateBookmarkUseCase;
-use crate::use_case::update_mail_address_use_case::UseUpdateMailAddressUseCase;
-use crate::use_case::update_password_by_secret_use_case::UseUpdatePasswordBySecretUseCase;
-use crate::use_case::update_password_use_case::UseUpdatePasswordUseCase;
-use crate::use_case::verify_mail_address_use_case::UseVerifyMailAddressUseCase;
+use crate::use_case::*;
 
 pub struct FakeEnv {
   bookmark_repository: BookmarkRepositoryImpl,

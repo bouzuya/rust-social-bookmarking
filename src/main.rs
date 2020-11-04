@@ -5,32 +5,7 @@ mod service;
 mod use_case;
 
 use crate::fake::fake_env::FakeEnv;
-use crate::use_case::create_bookmark_use_case::{CreateBookmarkUseCase, UseCreateBookmarkUseCase};
-use crate::use_case::create_user_use_case::{CreateUserUseCase, UseCreateUserUseCase};
-use crate::use_case::delete_bookmark_use_case::{DeleteBookmarkUseCase, UseDeleteBookmarkUseCase};
-use crate::use_case::delete_user_use_case::{DeleteUserUseCase, UseDeleteUserUseCase};
-use crate::use_case::get_current_user_use_case::{GetCurrentUserUseCase, UseGetCurrentUserUseCase};
-use crate::use_case::list_bookmarks_by_user_key_use_case::{
-    ListBookmarksByUserKeyUseCase, UseListBookmarksByUserKeyUseCase,
-};
-use crate::use_case::list_current_user_bookmarks_use_case::{
-    ListCurrentUserBookmarksUseCase, UseListCurrentUserBookmarksUseCase,
-};
-use crate::use_case::reset_password_use_case::{ResetPasswordUseCase, UseResetPasswordUseCase};
-use crate::use_case::sign_in_use_case::{SignInUseCase, UseSignInUseCase};
-use crate::use_case::sign_out_use_case::{SignOutUseCase, UseSignOutUseCase};
-use crate::use_case::sign_up_use_case::{SignUpUseCase, UseSignUpUseCase};
-use crate::use_case::update_bookmark_use_case::{UpdateBookmarkUseCase, UseUpdateBookmarkUseCase};
-use crate::use_case::update_mail_address_use_case::{
-    UpdateMailAddressUseCase, UseUpdateMailAddressUseCase,
-};
-use crate::use_case::update_password_by_secret_use_case::{
-    UpdatePasswordBySecretUseCase, UseUpdatePasswordBySecretUseCase,
-};
-use crate::use_case::update_password_use_case::{UpdatePasswordUseCase, UseUpdatePasswordUseCase};
-use crate::use_case::verify_mail_address_use_case::{
-    UseVerifyMailAddressUseCase, VerifyMailAddressUseCase,
-};
+use crate::use_case::*;
 use anyhow::Result;
 
 fn create_bookmark<T: UseCreateBookmarkUseCase>(env: &T) -> Result<()> {
