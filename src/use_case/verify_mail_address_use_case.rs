@@ -15,12 +15,16 @@ pub trait VerifyMailAddressUseCase: UseCredentialRepository {
         {
             None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
-                // TODO: check expired
-                let verified = credential.verify(&secret)?;
-                self.credential_repository().save(&verified)?;
-                // TODO: delete other credentials
-                credential.user_id();
-                Ok(())
+                let verification = credential.verification().unwrap();
+                if verification.expired() {
+                    Err(anyhow!("forbidden: invalid secret"))
+                } else {
+                    let verified = credential.verify(&secret)?;
+                    self.credential_repository().save(&verified)?;
+                    // TODO: delete other credentials
+                    credential.user_id();
+                    Ok(())
+                }
             }
         }
     }
