@@ -1,4 +1,4 @@
-use crate::service::session_service::{SessionService, UseSessionService};
+use crate::service::{SessionService, UseSessionService};
 use anyhow::Result;
 
 pub trait UseSignOutUseCase {

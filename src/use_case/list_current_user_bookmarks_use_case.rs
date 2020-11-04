@@ -1,6 +1,6 @@
 use crate::entity::bookmark::Bookmark;
 use crate::repository::bookmark_repository::{BookmarkRepository, UseBookmarkRepository};
-use crate::service::session_service::{SessionService, UseSessionService};
+use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};
 
 pub trait UseListCurrentUserBookmarksUseCase {

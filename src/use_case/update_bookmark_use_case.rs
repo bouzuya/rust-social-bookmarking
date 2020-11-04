@@ -3,7 +3,7 @@ use crate::entity::bookmark_key::BookmarkKey;
 use crate::entity::bookmark_title::BookmarkTitle;
 use crate::entity::bookmark_url::BookmarkUrl;
 use crate::repository::bookmark_repository::{BookmarkRepository, UseBookmarkRepository};
-use crate::service::session_service::{SessionService, UseSessionService};
+use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};
 
 pub trait UseUpdateBookmarkUseCase {

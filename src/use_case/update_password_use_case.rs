@@ -1,6 +1,6 @@
 use crate::entity::password::Password;
 use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
-use crate::service::session_service::{SessionService, UseSessionService};
+use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};
 
 pub trait UseUpdatePasswordUseCase {

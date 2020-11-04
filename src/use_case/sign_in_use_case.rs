@@ -2,7 +2,7 @@ use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
 use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
 use crate::repository::user_repository::{UseUserRepository, UserRepository};
-use crate::service::session_service::{SessionService, UseSessionService};
+use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};
 
 pub trait UseSignInUseCase {

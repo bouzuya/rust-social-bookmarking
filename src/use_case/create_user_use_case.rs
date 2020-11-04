@@ -2,7 +2,7 @@ use crate::entity::user::User;
 use crate::entity::verify_user_secret::VerifyUserSecret;
 use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
 use crate::repository::user_repository::{UseUserRepository, UserRepository};
-use crate::service::send_mail_service::{SendMailService, UseSendMailService};
+use crate::service::{SendMailService, UseSendMailService};
 use anyhow::{anyhow, Result};
 
 pub trait UseCreateUserUseCase {

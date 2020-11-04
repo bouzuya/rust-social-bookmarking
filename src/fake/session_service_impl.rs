@@ -1,5 +1,5 @@
 use crate::entity::user::User;
-use crate::service::session_service::SessionService;
+use crate::service::SessionService;
 use anyhow::Result;
 
 pub struct SessionServiceImpl;

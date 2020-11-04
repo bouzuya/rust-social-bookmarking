@@ -6,8 +6,8 @@ use crate::fake::user_repository_impl::UserRepositoryImpl;
 use crate::repository::bookmark_repository::UseBookmarkRepository;
 use crate::repository::credential_repository::UseCredentialRepository;
 use crate::repository::user_repository::UseUserRepository;
-use crate::service::send_mail_service::UseSendMailService;
-use crate::service::session_service::UseSessionService;
+use crate::service::UseSendMailService;
+use crate::service::UseSessionService;
 use crate::use_case::*;
 
 pub struct FakeEnv {

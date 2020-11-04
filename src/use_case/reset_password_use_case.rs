@@ -1,6 +1,6 @@
 use crate::entity::mail_address::MailAddress;
 use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
-use crate::service::send_mail_service::{SendMailService, UseSendMailService};
+use crate::service::{SendMailService, UseSendMailService};
 use anyhow::Result;
 
 pub trait UseResetPasswordUseCase {

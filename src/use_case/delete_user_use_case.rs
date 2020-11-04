@@ -1,6 +1,6 @@
 use crate::entity::user_key::UserKey;
 use crate::repository::user_repository::{UseUserRepository, UserRepository};
-use crate::service::session_service::{SessionService, UseSessionService};
+use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};
 
 pub trait UseDeleteUserUseCase {

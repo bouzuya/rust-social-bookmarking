@@ -1,6 +1,6 @@
 use crate::entity::credential::Credential;
 use crate::entity::user::User;
-use crate::service::send_mail_service::SendMailService;
+use crate::service::SendMailService;
 
 pub struct SendMailServiceImpl;
 
