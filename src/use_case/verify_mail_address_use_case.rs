@@ -21,8 +21,14 @@ pub trait VerifyMailAddressUseCase: UseCredentialRepository {
                 } else {
                     let verified = credential.verify(&secret)?;
                     self.credential_repository().save(&verified)?;
-                    // TODO: delete other credentials
-                    credential.user_id();
+                    for c in self
+                        .credential_repository()
+                        .find_by_user_id(&credential.user_id())?
+                    {
+                        if c.id() != verified.id() {
+                            self.credential_repository().delete(&c.id())?;
+                        }
+                    }
                     Ok(())
                 }
             }
