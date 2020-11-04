@@ -3,11 +3,8 @@ use crate::fake::credential_repository_impl::CredentialRepositoryImpl;
 use crate::fake::send_mail_service_impl::SendMailServiceImpl;
 use crate::fake::session_service_impl::SessionServiceImpl;
 use crate::fake::user_repository_impl::UserRepositoryImpl;
-use crate::repository::bookmark_repository::UseBookmarkRepository;
-use crate::repository::credential_repository::UseCredentialRepository;
-use crate::repository::user_repository::UseUserRepository;
-use crate::service::UseSendMailService;
-use crate::service::UseSessionService;
+use crate::repository::*;
+use crate::service::*;
 use crate::use_case::*;
 
 pub struct FakeEnv {

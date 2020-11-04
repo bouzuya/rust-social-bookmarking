@@ -1,5 +1,5 @@
 use crate::entity::user_key::UserKey;
-use crate::repository::user_repository::{UseUserRepository, UserRepository};
+use crate::repository::{UseUserRepository, UserRepository};
 use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};
 

@@ -1,6 +1,6 @@
 use crate::entity::password::Password;
 use crate::entity::verify_user_secret::VerifyUserSecret;
-use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
+use crate::repository::{CredentialRepository, UseCredentialRepository};
 use anyhow::{anyhow, Result};
 
 pub trait UseUpdatePasswordBySecretUseCase {

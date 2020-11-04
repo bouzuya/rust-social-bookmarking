@@ -1,5 +1,5 @@
 use crate::entity::password::Password;
-use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
+use crate::repository::{CredentialRepository, UseCredentialRepository};
 use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};
 

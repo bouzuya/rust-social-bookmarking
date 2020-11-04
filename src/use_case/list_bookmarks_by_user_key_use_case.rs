@@ -1,7 +1,8 @@
 use crate::entity::bookmark::Bookmark;
 use crate::entity::user_key::UserKey;
-use crate::repository::bookmark_repository::{BookmarkRepository, UseBookmarkRepository};
-use crate::repository::user_repository::{UseUserRepository, UserRepository};
+use crate::repository::{
+    BookmarkRepository, UseBookmarkRepository, UseUserRepository, UserRepository,
+};
 use crate::service::{SessionService, UseSessionService};
 use anyhow::{anyhow, Result};
 

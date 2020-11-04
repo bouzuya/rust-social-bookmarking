@@ -5,7 +5,7 @@ use crate::entity::bookmark_key::BookmarkKey;
 use crate::entity::bookmark_title::BookmarkTitle;
 use crate::entity::bookmark_url::BookmarkUrl;
 use crate::entity::user_id::UserId;
-use crate::repository::bookmark_repository::BookmarkRepository;
+use crate::repository::BookmarkRepository;
 use anyhow::Result;
 use std::convert::TryFrom;
 

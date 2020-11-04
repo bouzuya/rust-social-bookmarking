@@ -6,7 +6,7 @@ use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
 use crate::entity::user_id::UserId;
 use crate::entity::verify_user_secret::VerifyUserSecret;
-use crate::repository::credential_repository::CredentialRepository;
+use crate::repository::CredentialRepository;
 use anyhow::Result;
 use std::convert::TryInto;
 

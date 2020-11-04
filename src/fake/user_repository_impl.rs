@@ -2,7 +2,7 @@ use crate::entity::credential_id::CredentialId;
 use crate::entity::user::User;
 use crate::entity::user_id::UserId;
 use crate::entity::user_key::UserKey;
-use crate::repository::user_repository::UserRepository;
+use crate::repository::UserRepository;
 use anyhow::Result;
 
 pub struct UserRepositoryImpl;

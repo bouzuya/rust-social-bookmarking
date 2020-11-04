@@ -1,5 +1,5 @@
 use crate::entity::mail_address::MailAddress;
-use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
+use crate::repository::{CredentialRepository, UseCredentialRepository};
 use crate::service::{SendMailService, UseSendMailService};
 use anyhow::Result;
 

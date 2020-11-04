@@ -1,7 +1,7 @@
 use crate::entity::user::User;
 use crate::entity::verify_user_secret::VerifyUserSecret;
-use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
-use crate::repository::user_repository::{UseUserRepository, UserRepository};
+use crate::repository::{CredentialRepository, UseCredentialRepository};
+use crate::repository::{UseUserRepository, UserRepository};
 use crate::service::{SendMailService, UseSendMailService};
 use anyhow::{anyhow, Result};
 

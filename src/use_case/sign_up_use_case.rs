@@ -1,7 +1,8 @@
 use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
-use crate::repository::credential_repository::{CredentialRepository, UseCredentialRepository};
-use crate::repository::user_repository::{UseUserRepository, UserRepository};
+use crate::repository::{
+    CredentialRepository, UseCredentialRepository, UseUserRepository, UserRepository,
+};
 use crate::service::{SendMailService, UseSendMailService};
 use anyhow::Result;
 
