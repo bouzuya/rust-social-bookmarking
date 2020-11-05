@@ -1,4 +1,4 @@
-use crate::entity::{Credential, CredentialId, MailAddress, Password, UserId, VerifyUserSecret};
+use crate::entity::{Credential, CredentialId, CredentialSecret, MailAddress, Password, UserId};
 use crate::repository::CredentialRepository;
 use anyhow::Result;
 use std::convert::TryInto;
@@ -32,7 +32,7 @@ impl CredentialRepository for CredentialRepositoryImpl {
     todo!()
   }
 
-  fn find_by_verify_user_secret(&self, _: &VerifyUserSecret) -> Result<Option<Credential>> {
+  fn find_by_secret(&self, _: &CredentialSecret) -> Result<Option<Credential>> {
     todo!()
   }
 

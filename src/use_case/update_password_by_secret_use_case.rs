@@ -1,4 +1,4 @@
-use crate::entity::{Password, VerifyUserSecret};
+use crate::entity::{CredentialSecret, Password};
 use crate::repository::{CredentialRepository, UseCredentialRepository};
 use anyhow::{anyhow, Result};
 
@@ -10,13 +10,10 @@ pub trait UseUpdatePasswordBySecretUseCase {
 pub trait UpdatePasswordBySecretUseCase: UseCredentialRepository {
     fn update_password_by_secret(
         &self,
-        secret: &VerifyUserSecret,
+        secret: &CredentialSecret,
         password: &Password,
     ) -> Result<()> {
-        match self
-            .credential_repository()
-            .find_by_verify_user_secret(&secret)?
-        {
+        match self.credential_repository().find_by_secret(&secret)? {
             None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
                 let verification = credential.verification().unwrap();

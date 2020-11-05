@@ -1,4 +1,4 @@
-use crate::entity::VerifyUserSecret;
+use crate::entity::CredentialSecret;
 use crate::repository::{CredentialRepository, UseCredentialRepository};
 use anyhow::{anyhow, Result};
 
@@ -8,11 +8,8 @@ pub trait UseVerifyMailAddressUseCase {
 }
 
 pub trait VerifyMailAddressUseCase: UseCredentialRepository {
-    fn verify_mail_address(&self, secret: &VerifyUserSecret) -> Result<()> {
-        match self
-            .credential_repository()
-            .find_by_verify_user_secret(&secret)?
-        {
+    fn verify_mail_address(&self, secret: &CredentialSecret) -> Result<()> {
+        match self.credential_repository().find_by_secret(&secret)? {
             None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
                 let verification = credential.verification().unwrap();

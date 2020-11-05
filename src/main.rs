@@ -17,8 +17,8 @@ fn create_bookmark<T: UseCreateBookmarkUseCase>(env: &T) -> Result<()> {
 }
 
 fn create_user<T: UseCreateUserUseCase>(env: &T) -> Result<()> {
-    let verify_user_secret = "1".repeat(255).parse().unwrap();
-    env.create_user_use_case().create_user(verify_user_secret)
+    let secret = "1".repeat(255).parse().unwrap();
+    env.create_user_use_case().create_user(secret)
 }
 
 fn delete_bookmark<T: UseDeleteBookmarkUseCase>(env: &T) -> Result<()> {
@@ -108,9 +108,9 @@ fn update_password_by_secret<T: UseUpdatePasswordBySecretUseCase>(env: &T) -> Re
 }
 
 fn verify_mail_address<T: UseVerifyMailAddressUseCase>(env: &T) -> Result<()> {
-    let verify_user_secret = "1".repeat(255).parse().unwrap();
+    let secret = "1".repeat(255).parse().unwrap();
     env.verify_mail_address_use_case()
-        .verify_mail_address(&verify_user_secret)
+        .verify_mail_address(&secret)
 }
 
 fn main() {

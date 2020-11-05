@@ -2,9 +2,9 @@ use chrono::prelude::*;
 use chrono::Duration;
 
 #[derive(Clone, Copy, Debug)]
-pub struct CredentialVerificationExpiredAt(DateTime<Utc>);
+pub struct CredentialSecretExpiredAt(DateTime<Utc>);
 
-impl CredentialVerificationExpiredAt {
+impl CredentialSecretExpiredAt {
     pub fn new() -> Self {
         Self(Utc::now() + Duration::hours(1))
     }
@@ -14,14 +14,14 @@ impl CredentialVerificationExpiredAt {
     }
 }
 
-impl From<NaiveDateTime> for CredentialVerificationExpiredAt {
+impl From<NaiveDateTime> for CredentialSecretExpiredAt {
     fn from(dt: NaiveDateTime) -> Self {
         Self(DateTime::from_utc(dt, Utc))
     }
 }
 
-impl From<CredentialVerificationExpiredAt> for NaiveDateTime {
-    fn from(expired_at: CredentialVerificationExpiredAt) -> Self {
+impl From<CredentialSecretExpiredAt> for NaiveDateTime {
+    fn from(expired_at: CredentialSecretExpiredAt) -> Self {
         expired_at.0.naive_utc()
     }
 }

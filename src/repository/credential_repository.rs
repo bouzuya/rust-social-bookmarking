@@ -1,4 +1,4 @@
-use crate::entity::{Credential, CredentialId, MailAddress, Password, UserId, VerifyUserSecret};
+use crate::entity::{Credential, CredentialId, CredentialSecret, MailAddress, Password, UserId};
 use anyhow::Result;
 
 pub trait UseCredentialRepository {
@@ -9,10 +9,7 @@ pub trait UseCredentialRepository {
 pub trait CredentialRepository {
   fn find_by_user_id(&self, user_id: &UserId) -> Result<Vec<Credential>>;
   fn find_by_mail_address(&self, mail_address: &MailAddress) -> Result<Option<Credential>>;
-  fn find_by_verify_user_secret(
-    &self,
-    verify_user_secret: &VerifyUserSecret,
-  ) -> Result<Option<Credential>>;
+  fn find_by_secret(&self, secret: &CredentialSecret) -> Result<Option<Credential>>;
   fn create(
     &self,
     user_id: UserId,

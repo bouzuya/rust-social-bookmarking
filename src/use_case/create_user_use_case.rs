@@ -1,4 +1,4 @@
-use crate::entity::{User, VerifyUserSecret};
+use crate::entity::{CredentialSecret, User};
 use crate::repository::{
     CredentialRepository, UseCredentialRepository, UseUserRepository, UserRepository,
 };
@@ -13,18 +13,15 @@ pub trait UseCreateUserUseCase {
 pub trait CreateUserUseCase:
     UseCredentialRepository + UseUserRepository + UseSendMailService
 {
-    fn create_user(&self, verify_user_secret: VerifyUserSecret) -> Result<()> {
-        match self
-            .credential_repository()
-            .find_by_verify_user_secret(&verify_user_secret)?
-        {
+    fn create_user(&self, secret: CredentialSecret) -> Result<()> {
+        match self.credential_repository().find_by_secret(&secret)? {
             None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
                 let verification = credential.verification().unwrap();
                 if verification.expired() {
                     Err(anyhow!("forbidden: invalid secret"))
                 } else {
-                    let verified = credential.verify(&verify_user_secret)?;
+                    let verified = credential.verify(&secret)?;
                     let user = User::new(verified.user_id());
                     self.user_repository().create(&user)?;
                     self.credential_repository().save(&verified)?;
