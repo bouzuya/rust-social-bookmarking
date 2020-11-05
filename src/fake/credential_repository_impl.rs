@@ -1,7 +1,4 @@
-use crate::entity::{
-  Credential, CredentialId, CredentialVerification, CredentialVerificationExpiredAt, MailAddress,
-  Password, UserId, VerifyUserSecret,
-};
+use crate::entity::{Credential, CredentialId, MailAddress, Password, UserId, VerifyUserSecret};
 use crate::repository::CredentialRepository;
 use anyhow::Result;
 use std::convert::TryInto;
@@ -31,32 +28,12 @@ impl CredentialRepository for CredentialRepositoryImpl {
     todo!()
   }
 
-  fn find_by_mail_address(&self, mail_address: &MailAddress) -> Result<Option<Credential>> {
-    println!("CredentialRepository#find_by_mail_address");
-    let credential_id = 1.try_into().unwrap();
-    let user_id = 1.try_into().unwrap();
-    let mail_address = mail_address.clone();
-    let password = "password".parse().unwrap();
-    let verification = Some(CredentialVerification::new());
-    let credential = Credential::of(credential_id, user_id, mail_address, password, verification);
-    Ok(Some(credential))
+  fn find_by_mail_address(&self, _: &MailAddress) -> Result<Option<Credential>> {
+    todo!()
   }
 
-  fn find_by_verify_user_secret(
-    &self,
-    verify_user_secret: &VerifyUserSecret,
-  ) -> Result<Option<Credential>> {
-    println!("CredentialRepository#find_by_verify_user_secret");
-    let credential_id = 1.try_into().unwrap();
-    let user_id = 1.try_into().unwrap();
-    let mail_address = "m@bouzuya.net".parse().unwrap();
-    let password = "password".parse().unwrap();
-    let verification = Some(CredentialVerification::of(
-      CredentialVerificationExpiredAt::new(),
-      verify_user_secret.clone(),
-    ));
-    let credential = Credential::of(credential_id, user_id, mail_address, password, verification);
-    Ok(Some(credential))
+  fn find_by_verify_user_secret(&self, _: &VerifyUserSecret) -> Result<Option<Credential>> {
+    todo!()
   }
 
   fn delete(&self, _: &CredentialId) -> Result<()> {
