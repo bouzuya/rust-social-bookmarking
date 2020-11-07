@@ -1,13 +1,14 @@
+use rand::{thread_rng, Rng};
 use std::convert::TryFrom;
 use std::str::FromStr;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct UserKey(String);
 
 impl UserKey {
     pub fn generate() -> Self {
-        // TODO: generate key
-        Self("123456789012".into())
+        let mut rng = thread_rng();
+        Self(format!("{}", rng.gen_range(0_i64, 999_999_999_999_i64)))
     }
 }
 
@@ -32,5 +33,19 @@ impl FromStr for UserKey {
 impl From<UserKey> for String {
     fn from(user_key: UserKey) -> Self {
         user_key.0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn generate() {
+        let mut set = std::collections::HashSet::new();
+        for _ in 0..100 {
+            set.insert(UserKey::generate());
+        }
+        assert_eq!(set.len(), 100);
     }
 }
