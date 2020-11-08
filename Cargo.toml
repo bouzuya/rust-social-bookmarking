@@ -9,5 +9,6 @@ edition = "2018"
 [dependencies]
 anyhow = "1.0.33"
 chrono = "0.4.19"
-rand = "0.7.3"
+diesel = { version = "1.4.5", features = ["chrono", "postgres", "r2d2"] }
 dotenv = "0.15.0"
+rand = "0.7.3"
