@@ -1,6 +1,11 @@
+#[macro_use]
+extern crate diesel;
+
 mod entity;
 mod fake;
+mod pg;
 mod repository;
+mod schema;
 mod service;
 mod use_case;
 
