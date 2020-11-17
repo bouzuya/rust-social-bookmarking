@@ -5,13 +5,14 @@ use anyhow::Result;
 use diesel::prelude::*;
 use diesel::sql_types::*;
 use std::convert::TryFrom;
+use std::sync::Arc;
 
 struct PgUserRepository {
-  connection: PgConnection,
+  connection: Arc<PgConnection>,
 }
 
 impl PgUserRepository {
-  fn new(connection: PgConnection) -> Self {
+  fn new(connection: Arc<PgConnection>) -> Self {
     Self { connection }
   }
 }
@@ -38,13 +39,13 @@ impl UserRepository for PgUserRepository {
   fn create(&self, user: &User) -> Result<()> {
     diesel::insert_into(users::table)
       .values(UserRow::from(user))
-      .execute(&self.connection)
+      .execute(self.connection.as_ref())
       .map(|_| ())
       .map_err(anyhow::Error::msg)
   }
 
   fn create_id(&self) -> Result<UserId> {
-    let id = diesel::select(nextval("user_id")).get_result::<i64>(&self.connection)?;
+    let id = diesel::select(nextval("user_id")).get_result::<i64>(self.connection.as_ref())?;
     UserId::try_from(id as i32).map_err(anyhow::Error::msg)
   }
 
@@ -59,7 +60,7 @@ impl UserRepository for PgUserRepository {
   fn find_by_user_key(&self, user_key: &UserKey) -> Result<Option<User>> {
     crate::schema::users::dsl::users
       .filter(crate::schema::users::dsl::key.eq(String::from(user_key.clone())))
-      .first(&self.connection)
+      .first(self.connection.as_ref())
       .optional()
       .map(|result: Option<UserRow>| {
         result.map(|row| {
@@ -79,58 +80,57 @@ mod tests {
 
   #[test]
   fn test_create_user_id() {
-    dotenv::dotenv().ok();
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let connection = PgConnection::establish(&database_url)
-      .expect(&format!("Error connecting to {}", database_url));
-    let repository = PgUserRepository::new(connection);
-    let id1 = repository.create_id().expect("id");
-    let id2 = repository.create_id().expect("id");
-    assert_ne!(id1, id2);
+    let connection = establish_connection();
+    connection
+      .as_ref()
+      .test_transaction::<(), anyhow::Error, _>(|| {
+        let repository = PgUserRepository::new(connection.clone());
+        let id1 = repository.create_id()?;
+        let id2 = repository.create_id()?;
+        assert_ne!(id1, id2);
+        Ok(())
+      });
   }
 
   #[test]
   fn test_create_user() {
-    dotenv::dotenv().ok();
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let connection = PgConnection::establish(&database_url)
-      .expect(&format!("Error connecting to {}", database_url));
-    let repository = PgUserRepository::new(connection);
-    let id = repository.create_id().expect("id");
-    let user = User::new(id);
-    repository.create(&user).expect("user");
-    assert_eq!(
-      repository
-        .find_by_user_key(&user.key())
-        .expect("find_by_user_key"),
-      Some(user)
-    );
+    let connection = establish_connection();
+    connection
+      .as_ref()
+      .test_transaction::<(), anyhow::Error, _>(|| {
+        let repository = PgUserRepository::new(connection.clone());
+        let id = repository.create_id()?;
+        let user = User::new(id);
+        repository.create(&user)?;
+        assert_eq!(repository.find_by_user_key(&user.key())?, Some(user));
+        Ok(())
+      });
   }
 
   #[test]
   fn test_find_by_user_key() {
+    let connection = establish_connection();
+    connection
+      .as_ref()
+      .test_transaction::<(), anyhow::Error, _>(|| {
+        let repository = PgUserRepository::new(connection.clone());
+        let id = repository.create_id()?;
+        let user = User::new(id);
+        repository.create(&user)?;
+        let user_key1 = user.key();
+        assert_eq!(repository.find_by_user_key(&user_key1)?, Some(user));
+
+        let user_key2 = UserKey::generate();
+        assert_eq!(repository.find_by_user_key(&user_key2)?, None);
+        Ok(())
+      });
+  }
+
+  fn establish_connection() -> Arc<PgConnection> {
     dotenv::dotenv().ok();
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let connection = PgConnection::establish(&database_url)
       .expect(&format!("Error connecting to {}", database_url));
-    let repository = PgUserRepository::new(connection);
-    let id = repository.create_id().expect("id");
-    let user = User::new(id);
-    repository.create(&user).expect("user");
-    let user_key1 = user.key();
-    assert_eq!(
-      repository
-        .find_by_user_key(&user_key1)
-        .expect("find_by_user_key"),
-      Some(user)
-    );
-
-    let user_key2 = UserKey::generate();
-    assert_eq!(
-      repository
-        .find_by_user_key(&user_key2)
-        .expect("find_by_user_key"),
-      None
-    );
+    Arc::new(connection)
   }
 }
