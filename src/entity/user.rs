@@ -1,7 +1,7 @@
 use crate::entity::user_id::UserId;
 use crate::entity::user_key::UserKey;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct User {
     id: UserId,
     key: UserKey,
