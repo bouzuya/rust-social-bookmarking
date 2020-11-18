@@ -49,8 +49,12 @@ impl UserRepository for PgUserRepository {
     UserId::try_from(id as i32).map_err(anyhow::Error::msg)
   }
 
-  fn delete(&self, _: &UserId) -> Result<()> {
-    todo!()
+  fn delete(&self, user_id: &UserId) -> Result<()> {
+    diesel::delete(users::table)
+      .filter(users::dsl::id.eq(i32::from(user_id.clone())))
+      .execute(self.connection.as_ref())
+      .map(|_| ())
+      .map_err(anyhow::Error::msg)
   }
 
   fn find_by_credential_id(&self, _: &CredentialId) -> Result<Option<User>> {
@@ -58,8 +62,8 @@ impl UserRepository for PgUserRepository {
   }
 
   fn find_by_user_key(&self, user_key: &UserKey) -> Result<Option<User>> {
-    crate::schema::users::dsl::users
-      .filter(crate::schema::users::dsl::key.eq(String::from(user_key.clone())))
+    users::dsl::users
+      .filter(users::dsl::key.eq(String::from(user_key.clone())))
       .first(self.connection.as_ref())
       .optional()
       .map(|result: Option<UserRow>| {
@@ -79,7 +83,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_create_user_id() {
+  fn test_create_id() {
     let connection = establish_connection();
     connection
       .as_ref()
@@ -93,7 +97,7 @@ mod tests {
   }
 
   #[test]
-  fn test_create_user() {
+  fn test_create() {
     let connection = establish_connection();
     connection
       .as_ref()
@@ -103,6 +107,26 @@ mod tests {
         let user = User::new(id);
         repository.create(&user)?;
         assert_eq!(repository.find_by_user_key(&user.key())?, Some(user));
+        Ok(())
+      });
+  }
+
+  #[test]
+  fn test_delete() {
+    let connection = establish_connection();
+    connection
+      .as_ref()
+      .test_transaction::<(), anyhow::Error, _>(|| {
+        let repository = PgUserRepository::new(connection.clone());
+        let id = repository.create_id()?;
+        let user = User::new(id);
+        repository.create(&user)?;
+        let user_key1 = user.key();
+        assert_eq!(repository.find_by_user_key(&user_key1)?, Some(&user));
+
+        repository.delete(&user.id())?;
+        assert_eq!(repository.find_by_user_key(&user_key1)?, None);
+
         Ok(())
       });
   }
