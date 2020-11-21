@@ -4,7 +4,6 @@ table! {
         user_id -> Int4,
         mail_address -> Text,
         password -> Text,
-        status -> Int4,
     }
 }
 
