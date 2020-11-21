@@ -1,6 +1,6 @@
 use crate::entity::{CredentialId, User, UserId, UserKey};
 use crate::repository::UserRepository;
-use crate::schema::users;
+use crate::schema::user;
 use anyhow::Result;
 use diesel::prelude::*;
 use diesel::sql_types::*;
@@ -20,7 +20,7 @@ impl PgUserRepository {
 }
 
 #[derive(Insertable, Queryable)]
-#[table_name = "users"]
+#[table_name = "user"]
 struct UserRow {
   id: i32,
   key: String,
@@ -37,7 +37,7 @@ impl From<&User> for UserRow {
 
 impl UserRepository for PgUserRepository {
   fn create(&self, user: &User) -> Result<()> {
-    diesel::insert_into(users::table)
+    diesel::insert_into(user::table)
       .values(UserRow::from(user))
       .execute(self.connection.as_ref())
       .map(|_| ())
@@ -50,8 +50,8 @@ impl UserRepository for PgUserRepository {
   }
 
   fn delete(&self, user_id: &UserId) -> Result<()> {
-    diesel::delete(users::table)
-      .filter(users::dsl::id.eq(i32::from(user_id.clone())))
+    diesel::delete(user::table)
+      .filter(user::dsl::id.eq(i32::from(user_id.clone())))
       .execute(self.connection.as_ref())
       .map(|_| ())
       .map_err(anyhow::Error::msg)
@@ -62,8 +62,8 @@ impl UserRepository for PgUserRepository {
   }
 
   fn find_by_user_key(&self, user_key: &UserKey) -> Result<Option<User>> {
-    users::dsl::users
-      .filter(users::dsl::key.eq(String::from(user_key.clone())))
+    user::dsl::user
+      .filter(user::dsl::key.eq(String::from(user_key.clone())))
       .first(self.connection.as_ref())
       .optional()
       .map(|result: Option<UserRow>| {

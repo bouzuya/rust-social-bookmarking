@@ -32,13 +32,13 @@ table! {
 }
 
 table! {
-    users (id) {
+    user (id) {
         id -> Int4,
         key -> Text,
     }
 }
 
-joinable!(credential -> users (user_id));
+joinable!(credential -> user (user_id));
 joinable!(credential_password_reset -> credential (credential_id));
 joinable!(credential_verification -> credential (credential_id));
 joinable!(credential_verified -> credential (credential_id));
@@ -48,5 +48,5 @@ allow_tables_to_appear_in_same_query!(
     credential_password_reset,
     credential_verification,
     credential_verified,
-    users,
+    user,
 );
