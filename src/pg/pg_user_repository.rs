@@ -104,7 +104,7 @@ mod tests {
       .test_transaction::<(), anyhow::Error, _>(|| {
         let repository = PgUserRepository::new(connection.clone());
         let id = repository.create_id()?;
-        let user = User::new(id);
+        let user = User::new(&id);
         repository.create(&user)?;
         assert_eq!(repository.find_by_user_key(&user.key())?, Some(user));
         Ok(())
@@ -119,12 +119,12 @@ mod tests {
       .test_transaction::<(), anyhow::Error, _>(|| {
         let repository = PgUserRepository::new(connection.clone());
         let id = repository.create_id()?;
-        let user = User::new(id);
+        let user = User::new(&id);
         repository.create(&user)?;
         let user_key1 = user.key();
-        assert_eq!(repository.find_by_user_key(&user_key1)?, Some(&user));
+        assert_eq!(repository.find_by_user_key(&user_key1)?, Some(user));
 
-        repository.delete(&user.id())?;
+        repository.delete(&id)?;
         assert_eq!(repository.find_by_user_key(&user_key1)?, None);
 
         Ok(())
@@ -139,7 +139,7 @@ mod tests {
       .test_transaction::<(), anyhow::Error, _>(|| {
         let repository = PgUserRepository::new(connection.clone());
         let id = repository.create_id()?;
-        let user = User::new(id);
+        let user = User::new(&id);
         repository.create(&user)?;
         let user_key1 = user.key();
         assert_eq!(repository.find_by_user_key(&user_key1)?, Some(user));

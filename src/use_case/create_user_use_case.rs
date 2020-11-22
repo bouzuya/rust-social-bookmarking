@@ -22,7 +22,7 @@ pub trait CreateUserUseCase:
                     Err(anyhow!("forbidden: invalid secret"))
                 } else {
                     let verified = credential.verify(&secret)?;
-                    let user = User::new(verified.user_id());
+                    let user = User::new(&verified.user_id());
                     self.user_repository().create(&user)?;
                     self.credential_repository().save(&verified)?;
 

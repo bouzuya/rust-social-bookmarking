@@ -8,9 +8,9 @@ pub struct User {
 }
 
 impl User {
-    pub fn new(id: UserId) -> Self {
+    pub fn new(id: &UserId) -> Self {
         Self {
-            id,
+            id: id.clone(),
             key: UserKey::generate(),
         }
     }
