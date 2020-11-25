@@ -7,7 +7,7 @@ use crate::entity::password::Password;
 use crate::entity::user_id::UserId;
 use anyhow::{anyhow, Result};
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Credential {
     id: CredentialId,
     user_id: UserId,

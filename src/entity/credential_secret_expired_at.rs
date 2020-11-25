@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 use chrono::Duration;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct CredentialSecretExpiredAt(DateTime<Utc>);
 
 impl CredentialSecretExpiredAt {

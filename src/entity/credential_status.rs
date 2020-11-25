@@ -1,6 +1,6 @@
 use crate::entity::credential_secret_with_expiration::CredentialSecretWithExpiration;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum CredentialStatus {
     WaitingForVerification(CredentialSecretWithExpiration), // (1). -> (2) / -> (3)
     WaitingForDeletion,                                     // (2).

@@ -2,7 +2,7 @@ use crate::entity::credential_secret::CredentialSecret;
 use crate::entity::credential_secret_expired_at::CredentialSecretExpiredAt;
 use anyhow::{anyhow, Result};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CredentialSecretWithExpiration {
     expired_at: CredentialSecretExpiredAt,
     secret: CredentialSecret,
