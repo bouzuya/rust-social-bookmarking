@@ -8,7 +8,10 @@ pub struct BookmarkKey(String);
 impl BookmarkKey {
     pub fn generate() -> Self {
         let mut rng = thread_rng();
-        Self(format!("{}", rng.gen_range(0_i64, 999_999_999_999_999_i64)))
+        Self(format!(
+            "{:016}",
+            rng.gen_range(0_i64, 999_999_999_999_999_i64)
+        ))
     }
 }
 
@@ -44,7 +47,9 @@ mod tests {
     fn generate() {
         let mut set = std::collections::HashSet::new();
         for _ in 0..100 {
-            set.insert(BookmarkKey::generate());
+            let key = BookmarkKey::generate();
+            assert_eq!(key.0.len(), 16);
+            set.insert(key);
         }
         assert_eq!(set.len(), 100);
     }
