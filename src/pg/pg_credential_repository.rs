@@ -112,7 +112,7 @@ impl CredentialRepository for PgCredentialRepository {
     todo!()
   }
 
-  fn find_by_mail_address(&self, _: &MailAddress) -> Result<Option<Credential>> {
+  fn find_by_mail_address(&self, mail_address: &MailAddress) -> Result<Option<Credential>> {
     let found: Option<(
       i32,
       i32,
@@ -132,6 +132,7 @@ impl CredentialRepository for PgCredentialRepository {
         credential_verification::secret.nullable(),
         credential_verification::expired_at.nullable(),
       ))
+      .filter(credential::mail_address.eq(mail_address.to_string()))
       .first(self.connection.as_ref())
       .optional()
       .map_err(anyhow::Error::msg)?;
