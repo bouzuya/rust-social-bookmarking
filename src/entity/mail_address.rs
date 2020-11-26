@@ -28,3 +28,21 @@ impl From<MailAddress> for String {
         mail_address.0
     }
 }
+
+impl std::fmt::Display for MailAddress {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_to_string() {
+        let mail_address: MailAddress = "m@bouzuya.net".parse().unwrap();
+        assert_eq!("m@bouzuya.net".to_owned(), mail_address.to_string());
+        assert_eq!("m@bouzuya.net".to_owned(), format!("{}", mail_address));
+    }
+}
