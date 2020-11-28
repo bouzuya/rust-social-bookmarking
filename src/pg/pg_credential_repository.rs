@@ -224,8 +224,20 @@ impl CredentialRepository for PgCredentialRepository {
         Ok(credential)
     }
 
-    fn find_by_user_id(&self, _: &UserId) -> Result<Vec<Credential>> {
-        todo!()
+    fn find_by_user_id(&self, user_id: &UserId) -> Result<Vec<Credential>> {
+        credential::table
+            .left_outer_join(credential_password_reset::table)
+            .left_outer_join(credential_verification::table)
+            .left_outer_join(credential_verified::table)
+            .select(Self::columns())
+            .filter(credential::user_id.eq(i32::from(user_id.clone())))
+            .get_results(self.connection.as_ref())
+            .map(|rows| {
+                rows.into_iter()
+                    .filter_map(|row| Self::credential_from_row(row).ok())
+                    .collect()
+            })
+            .map_err(anyhow::Error::msg)
     }
 
     fn find_by_mail_address(&self, mail_address: &MailAddress) -> Result<Option<Credential>> {
@@ -346,13 +358,21 @@ mod tests {
                 verified
             };
 
-            {
+            let reset = {
                 let reset = verified.reset_password()?;
                 repository.save(&reset)?;
 
                 let found = repository.find_by_mail_address(&reset.mail_address())?;
                 assert_eq!(found, Some(reset.clone()));
+
+                reset
             };
+
+            {
+                let found = repository.find_by_user_id(&user.id())?;
+
+                assert_eq!(found, vec![reset.clone()]);
+            }
 
             Ok(())
         });
