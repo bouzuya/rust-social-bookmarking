@@ -1,5 +1,4 @@
 use chrono::prelude::*;
-use chrono::Duration;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct CredentialVerifiedAt(DateTime<Utc>);
