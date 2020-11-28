@@ -1,13 +1,26 @@
+use rand::{thread_rng, Rng};
+use sha2::{Digest, Sha256};
 use std::convert::TryFrom;
 use std::str::FromStr;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CredentialSecret(String);
 
 impl CredentialSecret {
     pub fn generate() -> Self {
-        // TODO: generate secret
-        CredentialSecret("1234567890".repeat(25) + "abcde")
+        let secret = {
+            let mut rng = thread_rng();
+            let mut arr = [0u8; 128];
+            rng.fill(&mut arr);
+            arr
+        };
+        let hash = {
+            let mut hasher = Sha256::new();
+            hasher.update(secret);
+            hasher.finalize()
+        };
+        let format = format!("{:X}", hash);
+        CredentialSecret(format)
     }
 }
 
@@ -38,5 +51,22 @@ impl From<CredentialSecret> for String {
 impl std::fmt::Display for CredentialSecret {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "{}", self.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    #[test]
+    fn generate() {
+        let mut set = HashSet::new();
+        for _ in 0..100 {
+            let key = CredentialSecret::generate();
+            assert_eq!(key.0.len(), 64);
+            set.insert(key);
+        }
+        assert_eq!(set.len(), 100);
     }
 }
