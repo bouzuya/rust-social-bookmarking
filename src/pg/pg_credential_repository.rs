@@ -176,8 +176,21 @@ impl CredentialRepository for PgCredentialRepository {
         todo!()
     }
 
-    fn save(&self, _: &Credential) -> Result<()> {
-        todo!()
+    fn save(&self, credential: &Credential) -> Result<()> {
+        // TODO:
+
+        if CredentialVerificationRow::try_from(credential)
+            .ok()
+            .is_none()
+        {
+            diesel::delete(credential_verification::table)
+                .filter(credential_verification::credential_id.eq(i32::from(credential.id())))
+                .execute(self.connection.as_ref())
+                .map(|_| ())
+                .map_err(anyhow::Error::msg)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -208,6 +221,26 @@ mod tests {
     #[test]
     fn test_find_by_mail_address() {
         // TODO
+    }
+
+    #[test]
+    fn test_save_verified() {
+        let connection = establish_connection();
+        connection
+            .as_ref()
+            .test_transaction::<(), anyhow::Error, _>(|| {
+                let user = create_user(&connection)?;
+                let repository = PgCredentialRepository::new(connection.clone());
+                let mail_address = "m@bouzuya.net".parse().unwrap();
+                let password = "password".parse().unwrap();
+                let created = repository.create(user.id(), &mail_address, &password)?;
+                let secret = created.verification().unwrap().secret();
+                let verified = created.verify(&secret)?;
+                repository.save(&verified)?;
+                let found = repository.find_by_mail_address(&mail_address)?;
+                assert_eq!(found, Some(verified));
+                Ok(())
+            });
     }
 
     fn create_user(connection: &Arc<PgConnection>) -> Result<User> {
