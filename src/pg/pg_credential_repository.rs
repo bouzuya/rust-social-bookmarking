@@ -54,6 +54,22 @@ struct CredentialPasswordResetRow {
     expired_at: NaiveDateTime,
 }
 
+impl TryFrom<&Credential> for CredentialPasswordResetRow {
+    type Error = &'static str;
+    fn try_from(
+        credential: &Credential,
+    ) -> std::result::Result<Self, <Self as TryFrom<&Credential>>::Error> {
+        match credential.password_reset() {
+            None => Err("invalid status"),
+            Some(v) => Ok(Self {
+                credential_id: credential.id().into(),
+                secret: v.secret().into(),
+                expired_at: v.expired_at().into(),
+            }),
+        }
+    }
+}
+
 #[derive(Insertable)]
 #[table_name = "credential_verification"]
 struct CredentialVerificationRow {
@@ -136,6 +152,8 @@ impl CredentialRepository for PgCredentialRepository {
             String,
             Option<String>,
             Option<NaiveDateTime>,
+            Option<String>,
+            Option<NaiveDateTime>,
             Option<NaiveDateTime>,
         )> = credential::table
             .left_outer_join(credential_password_reset::table)
@@ -146,6 +164,8 @@ impl CredentialRepository for PgCredentialRepository {
                 credential::user_id,
                 credential::mail_address,
                 credential::password,
+                credential_password_reset::secret.nullable(),
+                credential_password_reset::expired_at.nullable(),
                 credential_verification::secret.nullable(),
                 credential_verification::expired_at.nullable(),
                 credential_verified::verified_at.nullable(),
@@ -156,8 +176,29 @@ impl CredentialRepository for PgCredentialRepository {
             .map_err(anyhow::Error::msg)?;
         match found {
             None => Ok(None),
-            Some((id, user_id, mail_address, password, secret, expired_at, verified_at)) => {
-                let verification = match (secret, expired_at) {
+            Some((
+                id,
+                user_id,
+                mail_address,
+                password,
+                password_reset_secret,
+                password_reset_expired_at,
+                verification_secret,
+                verification_expired_at,
+                verified_at,
+            )) => {
+                let password_reset = match (password_reset_secret, password_reset_expired_at) {
+                    (None, Some(_)) | (Some(_), None) => Err(anyhow!("invalid database")),
+                    (None, None) => Ok(None),
+                    (Some(s), Some(e)) => {
+                        let secret = s.parse().map_err(anyhow::Error::msg)?;
+                        let expired_at = CredentialSecretExpiredAt::from(e);
+                        let secret_with_expiration =
+                            CredentialSecretWithExpiration::of(expired_at, secret);
+                        Ok(Some(secret_with_expiration))
+                    }
+                }?;
+                let verification = match (verification_secret, verification_expired_at) {
                     (None, Some(_)) | (Some(_), None) => Err(anyhow!("invalid database")),
                     (None, None) => Ok(None),
                     (Some(s), Some(e)) => {
@@ -182,7 +223,7 @@ impl CredentialRepository for PgCredentialRepository {
                     UserId::try_from(user_id).map_err(anyhow::Error::msg)?,
                     mail_address.parse().map_err(anyhow::Error::msg)?,
                     password.parse().map_err(anyhow::Error::msg)?,
-                    None,
+                    password_reset,
                     status,
                 )))
             }
@@ -198,7 +239,18 @@ impl CredentialRepository for PgCredentialRepository {
     }
 
     fn save(&self, credential: &Credential) -> Result<()> {
-        // TODO:
+        if let Some(row) = CredentialPasswordResetRow::try_from(credential).ok() {
+            diesel::delete(credential_password_reset::table)
+                .filter(credential_password_reset::credential_id.eq(i32::from(credential.id())))
+                .execute(self.connection.as_ref())
+                .map(|_| ())
+                .map_err(anyhow::Error::msg)?;
+            diesel::insert_into(credential_password_reset::table)
+                .values(row)
+                .execute(self.connection.as_ref())
+                .map(|_| ())
+                .map_err(anyhow::Error::msg)?;
+        }
 
         if CredentialVerificationRow::try_from(credential)
             .ok()
@@ -212,6 +264,11 @@ impl CredentialRepository for PgCredentialRepository {
         }
 
         if let Some(row) = CredentialVerifiedRow::try_from(credential).ok() {
+            diesel::delete(credential_verified::table)
+                .filter(credential_verified::credential_id.eq(i32::from(credential.id())))
+                .execute(self.connection.as_ref())
+                .map(|_| ())
+                .map_err(anyhow::Error::msg)?;
             diesel::insert_into(credential_verified::table)
                 .values(row)
                 .execute(self.connection.as_ref())
@@ -231,60 +288,60 @@ mod tests {
     use crate::repository::UserRepository;
 
     #[test]
-    fn test_create() {
-        let connection = establish_connection();
-        connection
-            .as_ref()
-            .test_transaction::<(), anyhow::Error, _>(|| {
-                let user = create_user(&connection)?;
-                let repository = PgCredentialRepository::new(connection.clone());
+    fn test_scenario() {
+        transaction(|connection| {
+            let user = {
+                let user_repository = PgUserRepository::new(connection.clone());
+                let user_id = user_repository.create_id()?;
+                let user = User::new(&user_id);
+                user_repository.create(&user)?;
+                user
+            };
+            let repository = PgCredentialRepository::new(connection.clone());
+
+            let created = {
                 let mail_address = "m@bouzuya.net".parse().unwrap();
                 let password = "password".parse().unwrap();
                 let created = repository.create(user.id(), &mail_address, &password)?;
-                let found = repository.find_by_mail_address(&mail_address)?;
-                assert_eq!(found, Some(created));
-                Ok(())
-            });
-    }
 
-    #[test]
-    fn test_find_by_mail_address() {
-        // TODO
-    }
+                let found = repository.find_by_mail_address(&created.mail_address())?;
+                assert_eq!(found, Some(created.clone()));
+                created
+            };
 
-    #[test]
-    fn test_save_verified() {
-        let connection = establish_connection();
-        connection
-            .as_ref()
-            .test_transaction::<(), anyhow::Error, _>(|| {
-                let user = create_user(&connection)?;
-                let repository = PgCredentialRepository::new(connection.clone());
-                let mail_address = "m@bouzuya.net".parse().unwrap();
-                let password = "password".parse().unwrap();
-                let created = repository.create(user.id(), &mail_address, &password)?;
+            let verified = {
                 let secret = created.verification().unwrap().secret();
                 let verified = created.verify(&secret)?;
                 repository.save(&verified)?;
-                let found = repository.find_by_mail_address(&mail_address)?;
-                assert_eq!(found, Some(verified));
-                Ok(())
-            });
+
+                let found = repository.find_by_mail_address(&verified.mail_address())?;
+                assert_eq!(found, Some(verified.clone()));
+                verified
+            };
+
+            {
+                let reset = verified.reset_password()?;
+                repository.save(&reset)?;
+
+                let found = repository.find_by_mail_address(&reset.mail_address())?;
+                assert_eq!(found, Some(reset.clone()));
+            };
+
+            Ok(())
+        });
     }
 
-    fn create_user(connection: &Arc<PgConnection>) -> Result<User> {
-        let user_repository = PgUserRepository::new(connection.clone());
-        let user_id = user_repository.create_id()?;
-        let user = User::new(&user_id);
-        user_repository.create(&user)?;
-        Ok(user)
-    }
-
-    fn establish_connection() -> Arc<PgConnection> {
+    fn transaction<F>(f: F)
+    where
+        F: FnOnce(Arc<PgConnection>) -> Result<()>,
+    {
         dotenv::dotenv().ok();
         let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
         let connection = PgConnection::establish(&database_url)
             .expect(&format!("Error connecting to {}", database_url));
-        Arc::new(connection)
+        let connection = Arc::new(connection);
+        connection
+            .as_ref()
+            .test_transaction::<(), anyhow::Error, _>(|| f(connection.clone()))
     }
 }

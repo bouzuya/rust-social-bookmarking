@@ -8,7 +8,7 @@ use crate::entity::user_id::UserId;
 use crate::entity::CredentialVerifiedAt;
 use anyhow::{anyhow, Result};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Credential {
     id: CredentialId,
     user_id: UserId,
