@@ -224,6 +224,30 @@ impl CredentialRepository for PgCredentialRepository {
         Ok(credential)
     }
 
+    fn delete(&self, credential_id: &CredentialId) -> Result<()> {
+        diesel::delete(credential_password_reset::table)
+            .filter(credential_password_reset::credential_id.eq(i32::from(credential_id.clone())))
+            .execute(self.connection.as_ref())
+            .map(|_| ())
+            .map_err(anyhow::Error::msg)?;
+        diesel::delete(credential_verification::table)
+            .filter(credential_verification::credential_id.eq(i32::from(credential_id.clone())))
+            .execute(self.connection.as_ref())
+            .map(|_| ())
+            .map_err(anyhow::Error::msg)?;
+        diesel::delete(credential_verified::table)
+            .filter(credential_verified::credential_id.eq(i32::from(credential_id.clone())))
+            .execute(self.connection.as_ref())
+            .map(|_| ())
+            .map_err(anyhow::Error::msg)?;
+        diesel::delete(credential::table)
+            .filter(credential::id.eq(i32::from(credential_id.clone())))
+            .execute(self.connection.as_ref())
+            .map(|_| ())
+            .map_err(anyhow::Error::msg)?;
+        Ok(())
+    }
+
     fn find_by_user_id(&self, user_id: &UserId) -> Result<Vec<Credential>> {
         credential::table
             .left_outer_join(credential_password_reset::table)
@@ -264,10 +288,6 @@ impl CredentialRepository for PgCredentialRepository {
             .optional()
             .map_err(anyhow::Error::msg)?;
         found.map(Self::credential_from_row).transpose()
-    }
-
-    fn delete(&self, _: &CredentialId) -> Result<()> {
-        todo!()
     }
 
     fn save(&self, credential: &Credential) -> Result<()> {
@@ -372,6 +392,13 @@ mod tests {
                 let found = repository.find_by_user_id(&user.id())?;
 
                 assert_eq!(found, vec![reset.clone()]);
+            }
+
+            {
+                repository.delete(&reset.id())?;
+
+                let found = repository.find_by_mail_address(&reset.mail_address())?;
+                assert_eq!(found, None);
             }
 
             Ok(())
