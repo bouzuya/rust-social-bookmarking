@@ -1,4 +1,14 @@
 table! {
+    bookmark (id) {
+        id -> Int4,
+        user_id -> Int4,
+        url -> Text,
+        comment -> Text,
+        title -> Text,
+    }
+}
+
+table! {
     credential (id) {
         id -> Int4,
         user_id -> Int4,
@@ -37,12 +47,14 @@ table! {
     }
 }
 
+joinable!(bookmark -> user (user_id));
 joinable!(credential -> user (user_id));
 joinable!(credential_password_reset -> credential (credential_id));
 joinable!(credential_verification -> credential (credential_id));
 joinable!(credential_verified -> credential (credential_id));
 
 allow_tables_to_appear_in_same_query!(
+    bookmark,
     credential,
     credential_password_reset,
     credential_verification,
