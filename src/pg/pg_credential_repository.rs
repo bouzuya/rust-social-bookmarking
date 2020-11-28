@@ -9,8 +9,7 @@ use crate::schema::{
 };
 use anyhow::{anyhow, Result};
 use chrono::NaiveDateTime;
-use diesel::prelude::*;
-use diesel::sql_types::*;
+use diesel::{expression::nullable::Nullable, prelude::*, sql_types::*};
 use std::convert::TryFrom;
 use std::sync::Arc;
 
@@ -23,6 +22,91 @@ pub struct PgCredentialRepository {
 impl PgCredentialRepository {
     pub fn new(connection: Arc<PgConnection>) -> Self {
         Self { connection }
+    }
+
+    fn columns() -> (
+        credential::columns::id,
+        credential::columns::user_id,
+        credential::columns::mail_address,
+        credential::columns::password,
+        Nullable<credential_password_reset::columns::secret>,
+        Nullable<credential_password_reset::columns::expired_at>,
+        Nullable<credential_verification::columns::secret>,
+        Nullable<credential_verification::columns::expired_at>,
+        Nullable<credential_verified::columns::verified_at>,
+    ) {
+        (
+            credential::id,
+            credential::user_id,
+            credential::mail_address,
+            credential::password,
+            credential_password_reset::secret.nullable(),
+            credential_password_reset::expired_at.nullable(),
+            credential_verification::secret.nullable(),
+            credential_verification::expired_at.nullable(),
+            credential_verified::verified_at.nullable(),
+        )
+    }
+
+    fn credential_from_row(
+        row: (
+            i32,
+            i32,
+            String,
+            String,
+            Option<String>,
+            Option<NaiveDateTime>,
+            Option<String>,
+            Option<NaiveDateTime>,
+            Option<NaiveDateTime>,
+        ),
+    ) -> Result<Credential> {
+        let (
+            id,
+            user_id,
+            mail_address,
+            password,
+            password_reset_secret,
+            password_reset_expired_at,
+            verification_secret,
+            verification_expired_at,
+            verified_at,
+        ) = row;
+        let password_reset = match (password_reset_secret, password_reset_expired_at) {
+            (None, Some(_)) | (Some(_), None) => Err(anyhow!("invalid database")),
+            (None, None) => Ok(None),
+            (Some(s), Some(e)) => {
+                let secret = s.parse().map_err(anyhow::Error::msg)?;
+                let expired_at = CredentialSecretExpiredAt::from(e);
+                let secret_with_expiration = CredentialSecretWithExpiration::of(expired_at, secret);
+                Ok(Some(secret_with_expiration))
+            }
+        }?;
+        let verification = match (verification_secret, verification_expired_at) {
+            (None, Some(_)) | (Some(_), None) => Err(anyhow!("invalid database")),
+            (None, None) => Ok(None),
+            (Some(s), Some(e)) => {
+                let secret = s.parse().map_err(anyhow::Error::msg)?;
+                let expired_at = CredentialSecretExpiredAt::from(e);
+                let secret_with_expiration = CredentialSecretWithExpiration::of(expired_at, secret);
+                Ok(Some(secret_with_expiration))
+            }
+        }?;
+        let status = match (verification, verified_at) {
+            (None, None) | (Some(_), Some(_)) => Err(anyhow!("invalid database")),
+            (None, Some(at)) => Ok(CredentialStatus::Verified(CredentialVerifiedAt::from(at))),
+            (Some(secret_with_expiration), None) => Ok(CredentialStatus::WaitingForVerification(
+                secret_with_expiration,
+            )),
+        }?;
+        Ok(Credential::of(
+            CredentialId::try_from(id).map_err(anyhow::Error::msg)?,
+            UserId::try_from(user_id).map_err(anyhow::Error::msg)?,
+            mail_address.parse().map_err(anyhow::Error::msg)?,
+            password.parse().map_err(anyhow::Error::msg)?,
+            password_reset,
+            status,
+        ))
     }
 }
 
@@ -145,93 +229,29 @@ impl CredentialRepository for PgCredentialRepository {
     }
 
     fn find_by_mail_address(&self, mail_address: &MailAddress) -> Result<Option<Credential>> {
-        let found: Option<(
-            i32,
-            i32,
-            String,
-            String,
-            Option<String>,
-            Option<NaiveDateTime>,
-            Option<String>,
-            Option<NaiveDateTime>,
-            Option<NaiveDateTime>,
-        )> = credential::table
+        let found = credential::table
             .left_outer_join(credential_password_reset::table)
             .left_outer_join(credential_verification::table)
             .left_outer_join(credential_verified::table)
-            .select((
-                credential::id,
-                credential::user_id,
-                credential::mail_address,
-                credential::password,
-                credential_password_reset::secret.nullable(),
-                credential_password_reset::expired_at.nullable(),
-                credential_verification::secret.nullable(),
-                credential_verification::expired_at.nullable(),
-                credential_verified::verified_at.nullable(),
-            ))
+            .select(Self::columns())
             .filter(credential::mail_address.eq(mail_address.to_string()))
             .first(self.connection.as_ref())
             .optional()
             .map_err(anyhow::Error::msg)?;
-        match found {
-            None => Ok(None),
-            Some((
-                id,
-                user_id,
-                mail_address,
-                password,
-                password_reset_secret,
-                password_reset_expired_at,
-                verification_secret,
-                verification_expired_at,
-                verified_at,
-            )) => {
-                let password_reset = match (password_reset_secret, password_reset_expired_at) {
-                    (None, Some(_)) | (Some(_), None) => Err(anyhow!("invalid database")),
-                    (None, None) => Ok(None),
-                    (Some(s), Some(e)) => {
-                        let secret = s.parse().map_err(anyhow::Error::msg)?;
-                        let expired_at = CredentialSecretExpiredAt::from(e);
-                        let secret_with_expiration =
-                            CredentialSecretWithExpiration::of(expired_at, secret);
-                        Ok(Some(secret_with_expiration))
-                    }
-                }?;
-                let verification = match (verification_secret, verification_expired_at) {
-                    (None, Some(_)) | (Some(_), None) => Err(anyhow!("invalid database")),
-                    (None, None) => Ok(None),
-                    (Some(s), Some(e)) => {
-                        let secret = s.parse().map_err(anyhow::Error::msg)?;
-                        let expired_at = CredentialSecretExpiredAt::from(e);
-                        let secret_with_expiration =
-                            CredentialSecretWithExpiration::of(expired_at, secret);
-                        Ok(Some(secret_with_expiration))
-                    }
-                }?;
-                let status = match (verification, verified_at) {
-                    (None, None) | (Some(_), Some(_)) => Err(anyhow!("invalid database")),
-                    (None, Some(at)) => {
-                        Ok(CredentialStatus::Verified(CredentialVerifiedAt::from(at)))
-                    }
-                    (Some(secret_with_expiration), None) => Ok(
-                        CredentialStatus::WaitingForVerification(secret_with_expiration),
-                    ),
-                }?;
-                Ok(Some(Credential::of(
-                    CredentialId::try_from(id).map_err(anyhow::Error::msg)?,
-                    UserId::try_from(user_id).map_err(anyhow::Error::msg)?,
-                    mail_address.parse().map_err(anyhow::Error::msg)?,
-                    password.parse().map_err(anyhow::Error::msg)?,
-                    password_reset,
-                    status,
-                )))
-            }
-        }
+        found.map(Self::credential_from_row).transpose()
     }
 
-    fn find_by_secret(&self, _: &CredentialSecret) -> Result<Option<Credential>> {
-        todo!()
+    fn find_by_secret(&self, secret: &CredentialSecret) -> Result<Option<Credential>> {
+        let found = credential::table
+            .left_outer_join(credential_password_reset::table)
+            .left_outer_join(credential_verification::table)
+            .left_outer_join(credential_verified::table)
+            .select(Self::columns())
+            .filter(credential_verification::secret.eq(secret.to_string()))
+            .first(self.connection.as_ref())
+            .optional()
+            .map_err(anyhow::Error::msg)?;
+        found.map(Self::credential_from_row).transpose()
     }
 
     fn delete(&self, _: &CredentialId) -> Result<()> {
@@ -308,6 +328,13 @@ mod tests {
                 assert_eq!(found, Some(created.clone()));
                 created
             };
+
+            {
+                let secret = created.verification().unwrap().secret();
+                let found = repository.find_by_secret(&secret)?;
+
+                assert_eq!(found, Some(created.clone()));
+            }
 
             let verified = {
                 let secret = created.verification().unwrap().secret();
