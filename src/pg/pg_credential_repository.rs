@@ -154,6 +154,7 @@ impl CredentialRepository for PgCredentialRepository {
           UserId::try_from(user_id).map_err(anyhow::Error::msg)?,
           mail_address.parse().map_err(anyhow::Error::msg)?,
           password.parse().map_err(anyhow::Error::msg)?,
+          None,
           // TODO: other status
           match v {
             Some(secret_with_expiration) => {
