@@ -1,6 +1,7 @@
 use crate::entity::{
     Credential, CredentialId, CredentialSecret, CredentialSecretExpiredAt,
-    CredentialSecretWithExpiration, CredentialStatus, MailAddress, Password, UserId,
+    CredentialSecretWithExpiration, CredentialStatus, CredentialVerifiedAt, MailAddress, Password,
+    UserId,
 };
 use crate::repository::CredentialRepository;
 use crate::schema::{
@@ -84,6 +85,21 @@ struct CredentialVerifiedRow {
     verified_at: NaiveDateTime,
 }
 
+impl TryFrom<&Credential> for CredentialVerifiedRow {
+    type Error = &'static str;
+    fn try_from(
+        credential: &Credential,
+    ) -> std::result::Result<Self, <Self as TryFrom<&Credential>>::Error> {
+        match credential.status() {
+            CredentialStatus::WaitingForVerification(_) => Err("invalid status"),
+            CredentialStatus::Verified(verified_at) => Ok(Self {
+                credential_id: credential.id().into(),
+                verified_at: verified_at.into(),
+            }),
+        }
+    }
+}
+
 impl CredentialRepository for PgCredentialRepository {
     fn create(
         &self,
@@ -120,6 +136,7 @@ impl CredentialRepository for PgCredentialRepository {
             String,
             Option<String>,
             Option<NaiveDateTime>,
+            Option<NaiveDateTime>,
         )> = credential::table
             .left_outer_join(credential_password_reset::table)
             .left_outer_join(credential_verification::table)
@@ -131,6 +148,7 @@ impl CredentialRepository for PgCredentialRepository {
                 credential::password,
                 credential_verification::secret.nullable(),
                 credential_verification::expired_at.nullable(),
+                credential_verified::verified_at.nullable(),
             ))
             .filter(credential::mail_address.eq(mail_address.to_string()))
             .first(self.connection.as_ref())
@@ -138,8 +156,8 @@ impl CredentialRepository for PgCredentialRepository {
             .map_err(anyhow::Error::msg)?;
         match found {
             None => Ok(None),
-            Some((id, user_id, mail_address, password, secret, expired_at)) => {
-                let v = match (secret, expired_at) {
+            Some((id, user_id, mail_address, password, secret, expired_at, verified_at)) => {
+                let verification = match (secret, expired_at) {
                     (None, Some(_)) | (Some(_), None) => Err(anyhow!("invalid database")),
                     (None, None) => Ok(None),
                     (Some(s), Some(e)) => {
@@ -150,19 +168,22 @@ impl CredentialRepository for PgCredentialRepository {
                         Ok(Some(secret_with_expiration))
                     }
                 }?;
+                let status = match (verification, verified_at) {
+                    (None, None) | (Some(_), Some(_)) => Err(anyhow!("invalid database")),
+                    (None, Some(at)) => {
+                        Ok(CredentialStatus::Verified(CredentialVerifiedAt::from(at)))
+                    }
+                    (Some(secret_with_expiration), None) => Ok(
+                        CredentialStatus::WaitingForVerification(secret_with_expiration),
+                    ),
+                }?;
                 Ok(Some(Credential::of(
                     CredentialId::try_from(id).map_err(anyhow::Error::msg)?,
                     UserId::try_from(user_id).map_err(anyhow::Error::msg)?,
                     mail_address.parse().map_err(anyhow::Error::msg)?,
                     password.parse().map_err(anyhow::Error::msg)?,
                     None,
-                    // TODO: other status
-                    match v {
-                        Some(secret_with_expiration) => {
-                            CredentialStatus::WaitingForVerification(secret_with_expiration)
-                        }
-                        None => CredentialStatus::Verified,
-                    },
+                    status,
                 )))
             }
         }
@@ -185,6 +206,14 @@ impl CredentialRepository for PgCredentialRepository {
         {
             diesel::delete(credential_verification::table)
                 .filter(credential_verification::credential_id.eq(i32::from(credential.id())))
+                .execute(self.connection.as_ref())
+                .map(|_| ())
+                .map_err(anyhow::Error::msg)?;
+        }
+
+        if let Some(row) = CredentialVerifiedRow::try_from(credential).ok() {
+            diesel::insert_into(credential_verified::table)
+                .values(row)
                 .execute(self.connection.as_ref())
                 .map(|_| ())
                 .map_err(anyhow::Error::msg)?;

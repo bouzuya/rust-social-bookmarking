@@ -5,7 +5,9 @@ use crate::entity::credential_status::CredentialStatus;
 use crate::entity::mail_address::MailAddress;
 use crate::entity::password::Password;
 use crate::entity::user_id::UserId;
+use crate::entity::CredentialVerifiedAt;
 use anyhow::{anyhow, Result};
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct Credential {
     id: CredentialId,
@@ -78,14 +80,14 @@ impl Credential {
     pub fn verification(&self) -> Option<CredentialSecretWithExpiration> {
         match &self.status {
             CredentialStatus::WaitingForVerification(verification) => Some(verification.clone()),
-            CredentialStatus::Verified => None,
+            CredentialStatus::Verified(_) => None,
         }
     }
 
     pub fn reset_password(&self) -> Result<Self> {
         match &self.status {
             CredentialStatus::WaitingForVerification(_) => Err(anyhow!("invalid status")),
-            CredentialStatus::Verified => Ok(Self {
+            CredentialStatus::Verified(_) => Ok(Self {
                 id: self.id(),
                 user_id: self.user_id(),
                 mail_address: self.mail_address(),
@@ -99,7 +101,7 @@ impl Credential {
     pub fn update_password(&self, password: &Password) -> Result<Self> {
         match self.status {
             CredentialStatus::WaitingForVerification(_) => Err(anyhow!("invalid status")),
-            CredentialStatus::Verified => Ok(Self {
+            CredentialStatus::Verified(_) => Ok(Self {
                 id: self.id(),
                 user_id: self.user_id(),
                 mail_address: self.mail_address(),
@@ -112,7 +114,7 @@ impl Credential {
 
     pub fn verify(&self, secret: &CredentialSecret) -> Result<Self> {
         match &self.status {
-            CredentialStatus::Verified => Err(anyhow!("invalid status")),
+            CredentialStatus::Verified(_) => Err(anyhow!("invalid status")),
             CredentialStatus::WaitingForVerification(verification) => {
                 verification.verify(secret)?;
                 Ok(Self {
@@ -121,7 +123,7 @@ impl Credential {
                     mail_address: self.mail_address(),
                     password: self.password(),
                     password_reset: self.password_reset(),
-                    status: CredentialStatus::Verified,
+                    status: CredentialStatus::Verified(CredentialVerifiedAt::new()),
                 })
             }
         }
