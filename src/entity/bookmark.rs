@@ -4,7 +4,7 @@ use crate::entity::{
 };
 use anyhow::Result;
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Bookmark {
     id: BookmarkId,
     key: BookmarkKey,
