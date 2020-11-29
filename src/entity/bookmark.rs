@@ -32,6 +32,24 @@ impl Bookmark {
         }
     }
 
+    pub fn from_fields(
+        id: BookmarkId,
+        key: BookmarkKey,
+        user_id: UserId,
+        url: BookmarkUrl,
+        title: BookmarkTitle,
+        comment: BookmarkComment,
+    ) -> Self {
+        Self {
+            id,
+            key,
+            user_id,
+            url,
+            title,
+            comment,
+        }
+    }
+
     pub fn id(&self) -> BookmarkId {
         self.id
     }
