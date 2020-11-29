@@ -105,8 +105,17 @@ impl BookmarkRepository for PgBookmarkRepository {
         found.map(Self::from_row).transpose()
     }
 
-    fn find_by_user_id(&self, _: &UserId) -> Result<Vec<Bookmark>> {
-        todo!()
+    fn find_by_user_id(&self, user_id: &UserId) -> Result<Vec<Bookmark>> {
+        bookmark::table
+            .select(Self::columns())
+            .filter(bookmark::columns::user_id.eq(i32::from(user_id.clone())))
+            .get_results(self.connection.as_ref())
+            .map(|rows| {
+                rows.into_iter()
+                    .filter_map(|row| Self::from_row(row).ok())
+                    .collect()
+            })
+            .map_err(anyhow::Error::msg)
     }
 
     fn save(&self, b: &Bookmark) -> Result<()> {
@@ -163,7 +172,7 @@ mod tests {
                 found.unwrap()
             };
 
-            {
+            let updated = {
                 let url = "https://blog.bouzuya.net".parse().unwrap();
                 let title = "blog.bouzuya.net".parse().unwrap();
                 let comment = "bouzuya's weblog".parse().unwrap();
@@ -171,6 +180,12 @@ mod tests {
                 repository.save(&updated)?;
 
                 assert_eq!(repository.find_by_key(&found.key())?, Some(updated.clone()));
+                updated
+            };
+
+            {
+                let found = repository.find_by_user_id(&updated.user_id())?;
+                assert_eq!(found, vec![updated.clone()]);
             }
 
             Ok(())
