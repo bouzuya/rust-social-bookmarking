@@ -1,13 +1,13 @@
-use crate::entity::bookmark_comment::BookmarkComment;
-use crate::entity::bookmark_id::BookmarkId;
-use crate::entity::bookmark_title::BookmarkTitle;
-use crate::entity::bookmark_url::BookmarkUrl;
-use crate::entity::user_id::UserId;
+use crate::entity::{
+    bookmark_comment::BookmarkComment, bookmark_id::BookmarkId, bookmark_key::BookmarkKey,
+    bookmark_title::BookmarkTitle, bookmark_url::BookmarkUrl, user_id::UserId,
+};
 use anyhow::Result;
 
 #[derive(Debug)]
 pub struct Bookmark {
     id: BookmarkId,
+    key: BookmarkKey,
     user_id: UserId,
     url: BookmarkUrl,
     comment: BookmarkComment,
@@ -24,6 +24,7 @@ impl Bookmark {
     ) -> Self {
         Self {
             id,
+            key: BookmarkKey::generate(),
             user_id,
             url,
             title,
@@ -33,6 +34,10 @@ impl Bookmark {
 
     pub fn id(&self) -> BookmarkId {
         self.id
+    }
+
+    pub fn key(&self) -> BookmarkKey {
+        self.key.clone()
     }
 
     pub fn user_id(&self) -> UserId {
