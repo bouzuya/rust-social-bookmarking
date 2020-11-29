@@ -1,9 +1,9 @@
-use crate::entity::{Bookmark, BookmarkId, UserId};
+use crate::entity::{Bookmark, BookmarkId, BookmarkKey, UserId};
 use crate::repository::BookmarkRepository;
 use crate::schema::bookmark;
 use anyhow::Result;
 use diesel::{prelude::*, sql_types::*};
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::sync::Arc;
 
 sql_function!(fn nextval(x: Text) -> BigInt);
@@ -15,6 +15,36 @@ pub struct PgBookmarkRepository {
 impl PgBookmarkRepository {
     pub fn new(connection: Arc<PgConnection>) -> Self {
         Self { connection }
+    }
+
+    fn columns() -> (
+        bookmark::columns::id,
+        bookmark::columns::key,
+        bookmark::columns::user_id,
+        bookmark::columns::url,
+        bookmark::columns::comment,
+        bookmark::columns::title,
+    ) {
+        (
+            bookmark::columns::id,
+            bookmark::columns::key,
+            bookmark::columns::user_id,
+            bookmark::columns::url,
+            bookmark::columns::comment,
+            bookmark::columns::title,
+        )
+    }
+
+    fn from_row(row: (i32, String, i32, String, String, String)) -> Result<Bookmark> {
+        let (id, key, user_id, url, comment, title) = row;
+        Ok(Bookmark::from_fields(
+            id.try_into().map_err(anyhow::Error::msg)?,
+            key.parse().map_err(anyhow::Error::msg)?,
+            user_id.try_into().map_err(anyhow::Error::msg)?,
+            url.parse().map_err(anyhow::Error::msg)?,
+            title.parse().map_err(anyhow::Error::msg)?,
+            comment.parse().map_err(anyhow::Error::msg)?,
+        ))
     }
 }
 
@@ -65,8 +95,14 @@ impl BookmarkRepository for PgBookmarkRepository {
         todo!()
     }
 
-    fn find_by_key(&self, _: &crate::entity::BookmarkKey) -> Result<Option<Bookmark>> {
-        todo!()
+    fn find_by_key(&self, key: &BookmarkKey) -> Result<Option<Bookmark>> {
+        let found = bookmark::table
+            .select(Self::columns())
+            .filter(bookmark::columns::key.eq(String::from(key.clone())))
+            .first(self.connection.as_ref())
+            .optional()
+            .map_err(anyhow::Error::msg)?;
+        found.map(Self::from_row).transpose()
     }
 
     fn find_by_user_id(&self, _: &UserId) -> Result<Vec<Bookmark>> {
@@ -108,12 +144,17 @@ mod tests {
             };
             let repository = PgBookmarkRepository::new(connection.clone());
 
-            {
+            let created = {
                 let url = "https://bouzuya.net".parse().unwrap();
                 let title = "bouzuya.net".parse().unwrap();
                 let comment = "bouzuya's website".parse().unwrap();
-                repository.create(user.id(), url, title, comment)?;
+                repository.create(user.id(), url, title, comment)?
             };
+
+            {
+                let found = repository.find_by_key(&created.key())?;
+                assert_eq!(found, Some(created.clone()));
+            }
 
             Ok(())
         });
