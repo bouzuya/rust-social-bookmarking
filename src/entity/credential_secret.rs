@@ -27,7 +27,7 @@ impl CredentialSecret {
 impl TryFrom<&str> for CredentialSecret {
     type Error = &'static str;
     fn try_from(s: &str) -> Result<Self, <Self as TryFrom<&str>>::Error> {
-        if s.len() == 255 && s.chars().all(|c| c.is_ascii_alphanumeric()) {
+        if s.len() == 64 && s.chars().all(|c| c.is_ascii_alphanumeric()) {
             Ok(CredentialSecret(s.to_owned()))
         } else {
             Err("Invalid format")
