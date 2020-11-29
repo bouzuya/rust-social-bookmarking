@@ -39,6 +39,18 @@ impl Bookmark {
         self.user_id
     }
 
+    pub fn url(&self) -> BookmarkUrl {
+        self.url.clone()
+    }
+
+    pub fn title(&self) -> BookmarkTitle {
+        self.title.clone()
+    }
+
+    pub fn comment(&self) -> BookmarkComment {
+        self.comment.clone()
+    }
+
     pub fn is_public(&self) -> bool {
         todo!()
     }
