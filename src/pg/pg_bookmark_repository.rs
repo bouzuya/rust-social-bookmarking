@@ -91,8 +91,12 @@ impl BookmarkRepository for PgBookmarkRepository {
             .map_err(anyhow::Error::msg)
     }
 
-    fn delete(&self, _: &BookmarkId) -> Result<()> {
-        todo!()
+    fn delete(&self, bookmark_id: &BookmarkId) -> Result<()> {
+        diesel::delete(bookmark::table)
+            .filter(bookmark::columns::id.eq(i32::from(bookmark_id.clone())))
+            .execute(self.connection.as_ref())
+            .map(|_| ())
+            .map_err(anyhow::Error::msg)
     }
 
     fn find_by_key(&self, key: &BookmarkKey) -> Result<Option<Bookmark>> {
@@ -187,6 +191,12 @@ mod tests {
                 let found = repository.find_by_user_id(&updated.user_id())?;
                 assert_eq!(found, vec![updated.clone()]);
             }
+
+            {
+                repository.delete(&updated.id())?;
+
+                assert_eq!(repository.find_by_key(&found.key())?, None);
+            };
 
             Ok(())
         });
