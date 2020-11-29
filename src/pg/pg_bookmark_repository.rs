@@ -1,7 +1,7 @@
 use crate::entity::{Bookmark, BookmarkId, UserId};
 use crate::repository::BookmarkRepository;
 use crate::schema::bookmark;
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use diesel::{prelude::*, sql_types::*};
 use std::convert::TryFrom;
 use std::sync::Arc;
@@ -22,6 +22,7 @@ impl PgBookmarkRepository {
 #[table_name = "bookmark"]
 struct BookmarkRow {
     id: i32,
+    key: String,
     user_id: i32,
     url: String,
     comment: String,
@@ -32,6 +33,7 @@ impl From<&Bookmark> for BookmarkRow {
     fn from(bookmark: &Bookmark) -> Self {
         Self {
             id: bookmark.id().into(),
+            key: bookmark.key().into(),
             user_id: bookmark.user_id().into(),
             url: bookmark.url().into(),
             comment: bookmark.comment().into(),

@@ -1,6 +1,7 @@
 table! {
     bookmark (id) {
         id -> Int4,
+        key -> Text,
         user_id -> Int4,
         url -> Text,
         comment -> Text,
