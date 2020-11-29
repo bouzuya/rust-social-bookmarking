@@ -84,6 +84,13 @@ impl Bookmark {
         title: BookmarkTitle,
         comment: BookmarkComment,
     ) -> Result<Bookmark> {
-        Ok(Self::new(self.id, self.user_id, url, title, comment))
+        Ok(Self::from_fields(
+            self.id(),
+            self.key(),
+            self.user_id(),
+            url,
+            title,
+            comment,
+        ))
     }
 }
