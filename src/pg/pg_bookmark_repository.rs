@@ -48,7 +48,7 @@ impl PgBookmarkRepository {
     }
 }
 
-#[derive(Insertable, Queryable)]
+#[derive(AsChangeset, Insertable, Queryable)]
 #[table_name = "bookmark"]
 struct BookmarkRow {
     id: i32,
@@ -109,8 +109,13 @@ impl BookmarkRepository for PgBookmarkRepository {
         todo!()
     }
 
-    fn save(&self, _: &Bookmark) -> Result<()> {
-        todo!()
+    fn save(&self, b: &Bookmark) -> Result<()> {
+        diesel::update(bookmark::table)
+            .set(BookmarkRow::from(b))
+            .filter(bookmark::columns::id.eq(i32::from(b.id())))
+            .execute(self.connection.as_ref())
+            .map(|_| ())
+            .map_err(anyhow::Error::msg)
     }
 }
 
@@ -151,9 +156,21 @@ mod tests {
                 repository.create(user.id(), url, title, comment)?
             };
 
-            {
+            let found = {
                 let found = repository.find_by_key(&created.key())?;
                 assert_eq!(found, Some(created.clone()));
+
+                found.unwrap()
+            };
+
+            {
+                let url = "https://blog.bouzuya.net".parse().unwrap();
+                let title = "blog.bouzuya.net".parse().unwrap();
+                let comment = "bouzuya's weblog".parse().unwrap();
+                let updated = found.update(url, title, comment)?;
+                repository.save(&updated)?;
+
+                assert_eq!(repository.find_by_key(&found.key())?, Some(updated.clone()));
             }
 
             Ok(())
