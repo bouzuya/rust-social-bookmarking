@@ -7,11 +7,11 @@ use anyhow::Result;
 
 #[derive(Debug)]
 pub struct Bookmark {
-    pub id: BookmarkId,
-    pub user_id: UserId,
-    pub url: BookmarkUrl,
-    pub comment: BookmarkComment,
-    pub title: BookmarkTitle,
+    id: BookmarkId,
+    user_id: UserId,
+    url: BookmarkUrl,
+    comment: BookmarkComment,
+    title: BookmarkTitle,
 }
 
 impl Bookmark {
