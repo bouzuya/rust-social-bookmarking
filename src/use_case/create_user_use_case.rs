@@ -1,4 +1,4 @@
-use crate::entity::{CredentialSecret, User};
+use crate::entity::CredentialSecret;
 use crate::repository::{
     CredentialRepository, UseCredentialRepository, UseUserRepository, UserRepository,
 };
@@ -22,13 +22,18 @@ pub trait CreateUserUseCase:
                     Err(anyhow!("forbidden: invalid secret"))
                 } else {
                     let verified = credential.verify(&secret)?;
-                    let user = User::new(&verified.user_id());
-                    self.user_repository().create(&user)?;
                     self.credential_repository().save(&verified)?;
-
-                    self.send_mail_service()
-                        .send_user_verified_mail(&user, &credential);
-                    Ok(())
+                    let user = self
+                        .user_repository()
+                        .find_by_credential_id(&credential.id())?;
+                    match user {
+                        None => Err(anyhow!("invalid database")),
+                        Some(user) => {
+                            self.send_mail_service()
+                                .send_user_verified_mail(&user, &credential);
+                            Ok(())
+                        }
+                    }
                 }
             }
         }

@@ -135,7 +135,6 @@ impl BookmarkRepository for PgBookmarkRepository {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::entity::User;
     use crate::{
         pg::{
             pg_credential_repository::PgCredentialRepository, pg_user_repository::PgUserRepository,
@@ -148,9 +147,7 @@ mod tests {
         transaction(|connection| {
             let user = {
                 let user_repository = PgUserRepository::new(connection.clone());
-                let user_id = user_repository.create_id()?;
-                let user = User::new(&user_id);
-                user_repository.create(&user)?;
+                let user = user_repository.create()?;
                 let credential_repository = PgCredentialRepository::new(connection.clone());
                 let mail_address = "m@bouzuya.net".parse().unwrap();
                 let password = "password".parse().unwrap();

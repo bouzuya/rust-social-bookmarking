@@ -11,11 +11,7 @@ impl UserRepositoryImpl {
 }
 
 impl UserRepository for UserRepositoryImpl {
-    fn create(&self, _: &User) -> Result<()> {
-        todo!()
-    }
-
-    fn create_id(&self) -> Result<UserId> {
+    fn create(&self) -> Result<User> {
         todo!()
     }
 

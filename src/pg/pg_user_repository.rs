@@ -36,17 +36,15 @@ impl From<&User> for UserRow {
 }
 
 impl UserRepository for PgUserRepository {
-    fn create(&self, user: &User) -> Result<()> {
-        diesel::insert_into(user::table)
-            .values(UserRow::from(user))
-            .execute(self.connection.as_ref())
-            .map(|_| ())
-            .map_err(anyhow::Error::msg)
-    }
-
-    fn create_id(&self) -> Result<UserId> {
+    fn create(&self) -> Result<User> {
         let id = diesel::select(nextval("user_id")).get_result::<i64>(self.connection.as_ref())?;
-        UserId::try_from(id as i32).map_err(anyhow::Error::msg)
+        let user_id = UserId::try_from(id as i32).map_err(anyhow::Error::msg)?;
+        let user = User::new(&user_id);
+        diesel::insert_into(user::table)
+            .values(UserRow::from(&user))
+            .execute(self.connection.as_ref())
+            .map(|_| user)
+            .map_err(anyhow::Error::msg)
     }
 
     fn delete(&self, user_id: &UserId) -> Result<()> {
@@ -83,29 +81,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_create_id() {
-        let connection = establish_connection();
-        connection
-            .as_ref()
-            .test_transaction::<(), anyhow::Error, _>(|| {
-                let repository = PgUserRepository::new(connection.clone());
-                let id1 = repository.create_id()?;
-                let id2 = repository.create_id()?;
-                assert_ne!(id1, id2);
-                Ok(())
-            });
-    }
-
-    #[test]
     fn test_create() {
         let connection = establish_connection();
         connection
             .as_ref()
             .test_transaction::<(), anyhow::Error, _>(|| {
                 let repository = PgUserRepository::new(connection.clone());
-                let id = repository.create_id()?;
-                let user = User::new(&id);
-                repository.create(&user)?;
+                let user = repository.create()?;
                 assert_eq!(repository.find_by_user_key(&user.key())?, Some(user));
                 Ok(())
             });
@@ -118,13 +100,11 @@ mod tests {
             .as_ref()
             .test_transaction::<(), anyhow::Error, _>(|| {
                 let repository = PgUserRepository::new(connection.clone());
-                let id = repository.create_id()?;
-                let user = User::new(&id);
-                repository.create(&user)?;
+                let user = repository.create()?;
                 let user_key1 = user.key();
-                assert_eq!(repository.find_by_user_key(&user_key1)?, Some(user));
+                assert_eq!(repository.find_by_user_key(&user_key1)?, Some(user.clone()));
 
-                repository.delete(&id)?;
+                repository.delete(&user.id())?;
                 assert_eq!(repository.find_by_user_key(&user_key1)?, None);
 
                 Ok(())
@@ -138,9 +118,7 @@ mod tests {
             .as_ref()
             .test_transaction::<(), anyhow::Error, _>(|| {
                 let repository = PgUserRepository::new(connection.clone());
-                let id = repository.create_id()?;
-                let user = User::new(&id);
-                repository.create(&user)?;
+                let user = repository.create()?;
                 let user_key1 = user.key();
                 assert_eq!(repository.find_by_user_key(&user_key1)?, Some(user));
 

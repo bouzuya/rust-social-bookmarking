@@ -335,7 +335,6 @@ impl CredentialRepository for PgCredentialRepository {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::entity::User;
     use crate::pg::pg_user_repository::PgUserRepository;
     use crate::repository::UserRepository;
 
@@ -344,10 +343,7 @@ mod tests {
         transaction(|connection| {
             let user = {
                 let user_repository = PgUserRepository::new(connection.clone());
-                let user_id = user_repository.create_id()?;
-                let user = User::new(&user_id);
-                user_repository.create(&user)?;
-                user
+                user_repository.create()?
             };
             let repository = PgCredentialRepository::new(connection.clone());
 

@@ -7,8 +7,7 @@ pub trait UseUserRepository {
 }
 
 pub trait UserRepository {
-    fn create(&self, user: &User) -> Result<()>;
-    fn create_id(&self) -> Result<UserId>;
+    fn create(&self) -> Result<User>;
     fn delete(&self, user_id: &UserId) -> Result<()>;
     fn find_by_credential_id(&self, _: &CredentialId) -> Result<Option<User>>;
     fn find_by_user_key(&self, _: &UserKey) -> Result<Option<User>>;

@@ -21,10 +21,10 @@ pub trait SignUpUseCase: UseCredentialRepository + UseUserRepository + UseSendMa
                 Some(_) => self.credential_repository().delete(&credential.id())?,
             }
         }
-        let user_id = self.user_repository().create_id()?;
-        let credential = self
-            .credential_repository()
-            .create(user_id, &mail_address, &password)?;
+        let user = self.user_repository().create()?;
+        let credential =
+            self.credential_repository()
+                .create(user.id(), &mail_address, &password)?;
         self.send_mail_service().send_create_user_mail(&credential);
         Ok(())
     }
