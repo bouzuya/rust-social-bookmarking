@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate diesel;
 
+mod cli;
 mod entity;
 mod fake;
 mod pg;
@@ -9,6 +10,7 @@ mod schema;
 mod service;
 mod use_case;
 
+use crate::cli::CliEnv;
 use crate::fake::fake_env::FakeEnv;
 use crate::use_case::*;
 use anyhow::Result;
@@ -119,6 +121,7 @@ fn verify_mail_address<T: UseVerifyMailAddressUseCase>(env: &T) -> Result<()> {
 }
 
 fn main() {
+    let cli = CliEnv::new();
     let env = FakeEnv::new();
     sign_up(&env).expect("sign up");
     create_user(&env).expect("create user");
