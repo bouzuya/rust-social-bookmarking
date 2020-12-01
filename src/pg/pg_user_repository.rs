@@ -1,10 +1,10 @@
 use crate::entity::{CredentialId, User, UserId, UserKey};
 use crate::repository::UserRepository;
-use crate::schema::user;
+use crate::schema::{credential, user};
 use anyhow::Result;
 use diesel::prelude::*;
 use diesel::sql_types::*;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::sync::Arc;
 
 sql_function!(fn nextval(x: Text) -> BigInt);
@@ -16,6 +16,18 @@ pub struct PgUserRepository {
 impl PgUserRepository {
     pub fn new(connection: Arc<PgConnection>) -> Self {
         Self { connection }
+    }
+
+    fn columns() -> (user::columns::id, user::columns::key) {
+        (user::columns::id, user::columns::key)
+    }
+
+    fn from_row(row: (i32, String)) -> Result<User> {
+        let (id, key) = row;
+        Ok(User::of(
+            id.try_into().map_err(anyhow::Error::msg)?,
+            key.parse().map_err(anyhow::Error::msg)?,
+        ))
     }
 }
 
@@ -55,24 +67,23 @@ impl UserRepository for PgUserRepository {
             .map_err(anyhow::Error::msg)
     }
 
-    fn find_by_credential_id(&self, _: &CredentialId) -> Result<Option<User>> {
-        todo!()
+    fn find_by_credential_id(&self, credential_id: &CredentialId) -> Result<Option<User>> {
+        let found = user::table
+            .inner_join(credential::table)
+            .select(Self::columns())
+            .filter(credential::columns::id.eq(i32::from(credential_id.clone())))
+            .first(self.connection.as_ref())
+            .optional()?;
+        found.map(|row| Self::from_row(row)).transpose()
     }
 
     fn find_by_user_key(&self, user_key: &UserKey) -> Result<Option<User>> {
-        user::dsl::user
+        let found = user::table
             .filter(user::dsl::key.eq(String::from(user_key.clone())))
             .first(self.connection.as_ref())
             .optional()
-            .map(|result: Option<UserRow>| {
-                result.map(|row| {
-                    User::of(
-                        UserId::try_from(row.id).unwrap(),
-                        UserKey::try_from(row.key.as_ref()).unwrap(),
-                    )
-                })
-            })
-            .map_err(anyhow::Error::msg)
+            .map_err(anyhow::Error::msg)?;
+        found.map(|row| Self::from_row(row)).transpose()
     }
 }
 
@@ -81,58 +92,38 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_create() {
-        let connection = establish_connection();
-        connection
-            .as_ref()
-            .test_transaction::<(), anyhow::Error, _>(|| {
-                let repository = PgUserRepository::new(connection.clone());
-                let user = repository.create()?;
-                assert_eq!(repository.find_by_user_key(&user.key())?, Some(user));
-                Ok(())
-            });
+    fn test_scenario() {
+        transaction(|connection| {
+            let repository = PgUserRepository::new(connection.clone());
+            let user = repository.create()?;
+            assert_eq!(
+                repository.find_by_user_key(&user.key())?,
+                Some(user.clone())
+            );
+
+            let user_key2 = UserKey::generate();
+            assert_eq!(repository.find_by_user_key(&user_key2)?, None);
+
+            // TODO: find_by_credential_id
+
+            repository.delete(&user.id())?;
+            assert_eq!(repository.find_by_user_key(&user.key())?, None);
+
+            Ok(())
+        });
     }
 
-    #[test]
-    fn test_delete() {
-        let connection = establish_connection();
-        connection
-            .as_ref()
-            .test_transaction::<(), anyhow::Error, _>(|| {
-                let repository = PgUserRepository::new(connection.clone());
-                let user = repository.create()?;
-                let user_key1 = user.key();
-                assert_eq!(repository.find_by_user_key(&user_key1)?, Some(user.clone()));
-
-                repository.delete(&user.id())?;
-                assert_eq!(repository.find_by_user_key(&user_key1)?, None);
-
-                Ok(())
-            });
-    }
-
-    #[test]
-    fn test_find_by_user_key() {
-        let connection = establish_connection();
-        connection
-            .as_ref()
-            .test_transaction::<(), anyhow::Error, _>(|| {
-                let repository = PgUserRepository::new(connection.clone());
-                let user = repository.create()?;
-                let user_key1 = user.key();
-                assert_eq!(repository.find_by_user_key(&user_key1)?, Some(user));
-
-                let user_key2 = UserKey::generate();
-                assert_eq!(repository.find_by_user_key(&user_key2)?, None);
-                Ok(())
-            });
-    }
-
-    fn establish_connection() -> Arc<PgConnection> {
+    fn transaction<F>(f: F)
+    where
+        F: FnOnce(Arc<PgConnection>) -> Result<()>,
+    {
         dotenv::dotenv().ok();
         let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
         let connection = PgConnection::establish(&database_url)
             .expect(&format!("Error connecting to {}", database_url));
-        Arc::new(connection)
+        let connection = Arc::new(connection);
+        connection
+            .as_ref()
+            .test_transaction::<(), anyhow::Error, _>(|| f(connection.clone()))
     }
 }
