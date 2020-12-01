@@ -125,6 +125,11 @@ fn run() -> Result<()> {
     let env = CliEnv::new();
     let matches = clap::App::new("rust-social-bookmarking")
         .subcommand(
+            clap::SubCommand::with_name("create-user")
+                .about("create-user")
+                .arg(clap::Arg::with_name("SECRET").help("secret").required(true)),
+        )
+        .subcommand(
             clap::SubCommand::with_name("sign-up")
                 .about("sign-up")
                 .arg(
@@ -140,6 +145,14 @@ fn run() -> Result<()> {
         )
         .get_matches();
     match matches.subcommand() {
+        ("create-user", Some(sub_matches)) => {
+            let secret = sub_matches
+                .value_of("SECRET")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            env.create_user_use_case().create_user(secret)?;
+        }
         ("sign-up", Some(sub_matches)) => {
             let mail_address = sub_matches
                 .value_of("MAIL_ADDRESS")
