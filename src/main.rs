@@ -14,6 +14,7 @@ use crate::cli::CliEnv;
 use crate::fake::fake_env::FakeEnv;
 use crate::use_case::*;
 use anyhow::Result;
+use clap;
 
 fn create_bookmark<T: UseCreateBookmarkUseCase>(env: &T) -> Result<()> {
     let url = "https://bouzuya.net".parse().unwrap();
@@ -24,7 +25,7 @@ fn create_bookmark<T: UseCreateBookmarkUseCase>(env: &T) -> Result<()> {
 }
 
 fn create_user<T: UseCreateUserUseCase>(env: &T) -> Result<()> {
-    let secret = "1".repeat(255).parse().unwrap();
+    let secret = "1".repeat(64).parse().unwrap();
     env.create_user_use_case().create_user(secret)
 }
 
@@ -120,8 +121,44 @@ fn verify_mail_address<T: UseVerifyMailAddressUseCase>(env: &T) -> Result<()> {
         .verify_mail_address(&secret)
 }
 
-fn main() {
-    let cli = CliEnv::new();
+fn run() -> Result<()> {
+    let env = CliEnv::new();
+    let matches = clap::App::new("rust-social-bookmarking")
+        .subcommand(
+            clap::SubCommand::with_name("sign-up")
+                .about("sign-up")
+                .arg(
+                    clap::Arg::with_name("MAIL_ADDRESS")
+                        .help("mail address")
+                        .required(true),
+                )
+                .arg(
+                    clap::Arg::with_name("PASSWORD")
+                        .help("password")
+                        .required(true),
+                ),
+        )
+        .get_matches();
+    match matches.subcommand() {
+        ("sign-up", Some(sub_matches)) => {
+            let mail_address = sub_matches
+                .value_of("MAIL_ADDRESS")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            let password = sub_matches
+                .value_of("PASSWORD")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            env.sign_up_use_case().sign_up(mail_address, password)?;
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
+fn run_fake() {
     let env = FakeEnv::new();
     sign_up(&env).expect("sign up");
     create_user(&env).expect("create user");
@@ -140,4 +177,12 @@ fn main() {
     update_password_by_secret(&env).expect("update password by secret");
     sign_in(&env).expect("sign in (2)");
     delete_user(&env).expect("delete user");
+}
+
+fn main() {
+    if true {
+        run().expect("error");
+    } else {
+        run_fake();
+    }
 }
