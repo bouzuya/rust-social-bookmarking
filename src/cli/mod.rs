@@ -1,5 +1,7 @@
+mod fs_session_service;
+
+use crate::cli::fs_session_service::FsSessionService;
 use crate::fake::send_mail_service_impl::SendMailServiceImpl;
-use crate::fake::session_service_impl::SessionServiceImpl;
 use crate::pg::*;
 use anyhow::Result;
 use diesel::{Connection, PgConnection};
@@ -11,12 +13,13 @@ pub fn run() -> Result<()> {
     let connection = PgConnection::establish(&database_url)
         .expect(&format!("Error connecting to {}", database_url));
     let connection = Arc::new(connection);
+    let user_repository = Arc::new(PgUserRepository::new(connection.clone()));
     let app = crate::app::App::new(
         Arc::new(PgBookmarkRepository::new(connection.clone())),
         Arc::new(PgCredentialRepository::new(connection.clone())),
         Arc::new(SendMailServiceImpl::new()),
-        Arc::new(SessionServiceImpl::new()),
-        Arc::new(PgUserRepository::new(connection.clone())),
+        Arc::new(FsSessionService::new(user_repository.clone())),
+        user_repository,
     );
     let matches = clap::App::new("rust-social-bookmarking")
         .subcommand(
