@@ -1,20 +1,30 @@
 use crate::entity::CredentialSecret;
-use crate::repository::{
-    CredentialRepository, UseCredentialRepository, UseUserRepository, UserRepository,
-};
-use crate::service::{SendMailService, UseSendMailService};
+use crate::repository::{CredentialRepository, UserRepository};
+use crate::service::SendMailService;
 use anyhow::{anyhow, Result};
+use std::sync::Arc;
 
-pub trait UseCreateUserUseCase {
-    type CreateUserUseCase: CreateUserUseCase;
-    fn create_user_use_case(&self) -> &Self::CreateUserUseCase;
+pub struct CreateUserUseCase {
+    credential_repository: Arc<dyn CredentialRepository>,
+    user_repository: Arc<dyn UserRepository>,
+    send_mail_service: Arc<dyn SendMailService>,
 }
 
-pub trait CreateUserUseCase:
-    UseCredentialRepository + UseUserRepository + UseSendMailService
-{
-    fn create_user(&self, secret: CredentialSecret) -> Result<()> {
-        match self.credential_repository().find_by_secret(&secret)? {
+impl CreateUserUseCase {
+    pub fn new(
+        credential_repository: Arc<dyn CredentialRepository>,
+        user_repository: Arc<dyn UserRepository>,
+        send_mail_service: Arc<dyn SendMailService>,
+    ) -> Self {
+        Self {
+            credential_repository,
+            user_repository,
+            send_mail_service,
+        }
+    }
+
+    pub fn create_user(&self, secret: CredentialSecret) -> Result<()> {
+        match self.credential_repository.find_by_secret(&secret)? {
             None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
                 let verification = credential.verification().unwrap();
@@ -22,14 +32,14 @@ pub trait CreateUserUseCase:
                     Err(anyhow!("forbidden: invalid secret"))
                 } else {
                     let verified = credential.verify(&secret)?;
-                    self.credential_repository().save(&verified)?;
+                    self.credential_repository.save(&verified)?;
                     let user = self
-                        .user_repository()
+                        .user_repository
                         .find_by_credential_id(&credential.id())?;
                     match user {
                         None => Err(anyhow!("invalid database")),
                         Some(user) => {
-                            self.send_mail_service()
+                            self.send_mail_service
                                 .send_user_verified_mail(&user, &credential);
                             Ok(())
                         }
@@ -39,5 +49,3 @@ pub trait CreateUserUseCase:
         }
     }
 }
-
-impl<T: UseCredentialRepository + UseUserRepository + UseSendMailService> CreateUserUseCase for T {}

@@ -1,19 +1,31 @@
 use crate::entity::{MailAddress, Password};
-use crate::repository::{
-    CredentialRepository, UseCredentialRepository, UseUserRepository, UserRepository,
-};
-use crate::service::{SessionService, UseSessionService};
+use crate::repository::{CredentialRepository, UserRepository};
+use crate::service::SessionService;
 use anyhow::{anyhow, Result};
+use std::sync::Arc;
 
-pub trait UseSignInUseCase {
-    type SignInUseCase: SignInUseCase;
-    fn sign_in_use_case(&self) -> &Self::SignInUseCase;
+pub struct SignInUseCase {
+    credential_repository: Arc<dyn CredentialRepository>,
+    user_repository: Arc<dyn UserRepository>,
+    session_service: Arc<dyn SessionService>,
 }
 
-pub trait SignInUseCase: UseCredentialRepository + UseUserRepository + UseSessionService {
-    fn sign_in(&self, mail_address: &MailAddress, password: &Password) -> Result<()> {
+impl SignInUseCase {
+    pub fn new(
+        credential_repository: Arc<dyn CredentialRepository>,
+        user_repository: Arc<dyn UserRepository>,
+        session_service: Arc<dyn SessionService>,
+    ) -> Self {
+        Self {
+            credential_repository,
+            user_repository,
+            session_service,
+        }
+    }
+
+    pub fn sign_in(&self, mail_address: &MailAddress, password: &Password) -> Result<()> {
         match self
-            .credential_repository()
+            .credential_repository
             .find_by_mail_address(mail_address)?
         {
             None => Err(anyhow!("unauthorized")),
@@ -22,16 +34,14 @@ pub trait SignInUseCase: UseCredentialRepository + UseUserRepository + UseSessio
                     Err(anyhow!("unauthorized"))
                 } else {
                     match self
-                        .user_repository()
+                        .user_repository
                         .find_by_credential_id(&credential.id())?
                     {
                         None => Err(anyhow!("not found")),
-                        Some(user) => self.session_service().set_current_user(Some(user)),
+                        Some(user) => self.session_service.set_current_user(Some(user)),
                     }
                 }
             }
         }
     }
 }
-
-impl<T: UseCredentialRepository + UseUserRepository + UseSessionService> SignInUseCase for T {}

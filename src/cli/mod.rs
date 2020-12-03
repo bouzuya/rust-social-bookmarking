@@ -1,11 +1,23 @@
-mod env;
-
-use crate::cli::env::CliEnv;
-use crate::use_case::*;
+use crate::fake::send_mail_service_impl::SendMailServiceImpl;
+use crate::fake::session_service_impl::SessionServiceImpl;
+use crate::pg::*;
 use anyhow::Result;
+use diesel::{Connection, PgConnection};
+use std::sync::Arc;
 
 pub fn run() -> Result<()> {
-    let env = CliEnv::new();
+    dotenv::dotenv().ok();
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let connection = PgConnection::establish(&database_url)
+        .expect(&format!("Error connecting to {}", database_url));
+    let connection = Arc::new(connection);
+    let app = crate::app::App::new(
+        Arc::new(PgBookmarkRepository::new(connection.clone())),
+        Arc::new(PgCredentialRepository::new(connection.clone())),
+        Arc::new(SendMailServiceImpl::new()),
+        Arc::new(SessionServiceImpl::new()),
+        Arc::new(PgUserRepository::new(connection.clone())),
+    );
     let matches = clap::App::new("rust-social-bookmarking")
         .subcommand(
             clap::SubCommand::with_name("create-user")
@@ -48,7 +60,7 @@ pub fn run() -> Result<()> {
                 .unwrap()
                 .parse()
                 .map_err(anyhow::Error::msg)?;
-            env.create_user_use_case().create_user(secret)?;
+            app.create_user_use_case().create_user(secret)?;
         }
         ("sign-in", Some(sub_matches)) => {
             let mail_address = sub_matches
@@ -61,7 +73,7 @@ pub fn run() -> Result<()> {
                 .unwrap()
                 .parse()
                 .map_err(anyhow::Error::msg)?;
-            env.sign_in_use_case().sign_in(&mail_address, &password)?;
+            app.sign_in_use_case().sign_in(&mail_address, &password)?;
         }
         ("sign-up", Some(sub_matches)) => {
             let mail_address = sub_matches
@@ -74,7 +86,7 @@ pub fn run() -> Result<()> {
                 .unwrap()
                 .parse()
                 .map_err(anyhow::Error::msg)?;
-            env.sign_up_use_case().sign_up(mail_address, password)?;
+            app.sign_up_use_case().sign_up(mail_address, password)?;
         }
         _ => {}
     }

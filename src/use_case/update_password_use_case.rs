@@ -1,20 +1,31 @@
 use crate::entity::Password;
-use crate::repository::{CredentialRepository, UseCredentialRepository};
-use crate::service::{SessionService, UseSessionService};
+use crate::repository::CredentialRepository;
+use crate::service::SessionService;
 use anyhow::{anyhow, Result};
+use std::sync::Arc;
 
-pub trait UseUpdatePasswordUseCase {
-    type UpdatePasswordUseCase: UpdatePasswordUseCase;
-    fn update_password_use_case(&self) -> &Self::UpdatePasswordUseCase;
+pub struct UpdatePasswordUseCase {
+    credential_repository: Arc<dyn CredentialRepository>,
+    session_service: Arc<dyn SessionService>,
 }
 
-pub trait UpdatePasswordUseCase: UseCredentialRepository + UseSessionService {
-    fn update_password(&self, password: &Password) -> Result<()> {
-        match self.session_service().get_current_user()? {
+impl UpdatePasswordUseCase {
+    pub fn new(
+        credential_repository: Arc<dyn CredentialRepository>,
+        session_service: Arc<dyn SessionService>,
+    ) -> Self {
+        Self {
+            credential_repository,
+            session_service,
+        }
+    }
+
+    pub fn update_password(&self, password: &Password) -> Result<()> {
+        match self.session_service.get_current_user()? {
             None => Err(anyhow!("unauthorized")),
             Some(current_user) => {
                 let credentials = self
-                    .credential_repository()
+                    .credential_repository
                     .find_by_user_id(&current_user.id())?;
                 match credentials
                     .into_iter()
@@ -24,12 +35,10 @@ pub trait UpdatePasswordUseCase: UseCredentialRepository + UseSessionService {
                     None => unreachable!(),
                     Some(credential) => {
                         let updated = credential.update_password(&password)?;
-                        self.credential_repository().save(&updated)
+                        self.credential_repository.save(&updated)
                     }
                 }
             }
         }
     }
 }
-
-impl<T: UseCredentialRepository + UseSessionService> UpdatePasswordUseCase for T {}

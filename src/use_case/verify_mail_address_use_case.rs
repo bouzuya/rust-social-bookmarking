@@ -1,15 +1,21 @@
 use crate::entity::CredentialSecret;
-use crate::repository::{CredentialRepository, UseCredentialRepository};
+use crate::repository::CredentialRepository;
 use anyhow::{anyhow, Result};
+use std::sync::Arc;
 
-pub trait UseVerifyMailAddressUseCase {
-    type VerifyMailAddressUseCase: VerifyMailAddressUseCase;
-    fn verify_mail_address_use_case(&self) -> &Self::VerifyMailAddressUseCase;
+pub struct VerifyMailAddressUseCase {
+    credential_repository: Arc<dyn CredentialRepository>,
 }
 
-pub trait VerifyMailAddressUseCase: UseCredentialRepository {
-    fn verify_mail_address(&self, secret: &CredentialSecret) -> Result<()> {
-        match self.credential_repository().find_by_secret(&secret)? {
+impl VerifyMailAddressUseCase {
+    pub fn new(credential_repository: Arc<dyn CredentialRepository>) -> Self {
+        Self {
+            credential_repository,
+        }
+    }
+
+    pub fn verify_mail_address(&self, secret: &CredentialSecret) -> Result<()> {
+        match self.credential_repository.find_by_secret(&secret)? {
             None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
                 let verification = credential.verification().unwrap();
@@ -17,13 +23,13 @@ pub trait VerifyMailAddressUseCase: UseCredentialRepository {
                     Err(anyhow!("forbidden: invalid secret"))
                 } else {
                     let verified = credential.verify(&secret)?;
-                    self.credential_repository().save(&verified)?;
+                    self.credential_repository.save(&verified)?;
                     for c in self
-                        .credential_repository()
+                        .credential_repository
                         .find_by_user_id(&credential.user_id())?
                     {
                         if c.id() != verified.id() {
-                            self.credential_repository().delete(&c.id())?;
+                            self.credential_repository.delete(&c.id())?;
                         }
                     }
                     Ok(())
@@ -32,5 +38,3 @@ pub trait VerifyMailAddressUseCase: UseCredentialRepository {
         }
     }
 }
-
-impl<T: UseCredentialRepository> VerifyMailAddressUseCase for T {}

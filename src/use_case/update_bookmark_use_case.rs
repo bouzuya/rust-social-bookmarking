@@ -1,24 +1,35 @@
 use crate::entity::{BookmarkComment, BookmarkKey, BookmarkTitle, BookmarkUrl};
-use crate::repository::{BookmarkRepository, UseBookmarkRepository};
-use crate::service::{SessionService, UseSessionService};
+use crate::repository::BookmarkRepository;
+use crate::service::SessionService;
 use anyhow::{anyhow, Result};
+use std::sync::Arc;
 
-pub trait UseUpdateBookmarkUseCase {
-    type UpdateBookmarkUseCase: UpdateBookmarkUseCase;
-    fn update_bookmark_use_case(&self) -> &Self::UpdateBookmarkUseCase;
+pub struct UpdateBookmarkUseCase {
+    bookmark_repository: Arc<dyn BookmarkRepository>,
+    session_service: Arc<dyn SessionService>,
 }
 
-pub trait UpdateBookmarkUseCase: UseBookmarkRepository + UseSessionService {
-    fn update_bookmark(
+impl UpdateBookmarkUseCase {
+    pub fn new(
+        bookmark_repository: Arc<dyn BookmarkRepository>,
+        session_service: Arc<dyn SessionService>,
+    ) -> Self {
+        Self {
+            bookmark_repository,
+            session_service,
+        }
+    }
+
+    pub fn update_bookmark(
         &self,
         bookmark_key: BookmarkKey,
         bookmark_url: BookmarkUrl,
         bookmark_title: BookmarkTitle,
         bookmark_comment: BookmarkComment,
     ) -> Result<()> {
-        match self.session_service().get_current_user()? {
+        match self.session_service.get_current_user()? {
             None => Err(anyhow!("unauthorized")),
-            Some(current_user) => match self.bookmark_repository().find_by_key(&bookmark_key)? {
+            Some(current_user) => match self.bookmark_repository.find_by_key(&bookmark_key)? {
                 None => Err(anyhow!("no bookmark")),
                 Some(bookmark) if bookmark.user_id() != current_user.id() => {
                     Err(anyhow!("forbidden"))
@@ -26,11 +37,9 @@ pub trait UpdateBookmarkUseCase: UseBookmarkRepository + UseSessionService {
                 Some(bookmark) => {
                     let updated =
                         bookmark.update(bookmark_url, bookmark_title, bookmark_comment)?;
-                    self.bookmark_repository().save(&updated)
+                    self.bookmark_repository.save(&updated)
                 }
             },
         }
     }
 }
-
-impl<T: UseBookmarkRepository + UseSessionService> UpdateBookmarkUseCase for T {}

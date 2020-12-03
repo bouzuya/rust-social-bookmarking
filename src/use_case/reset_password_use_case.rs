@@ -1,26 +1,37 @@
 use crate::entity::MailAddress;
-use crate::repository::{CredentialRepository, UseCredentialRepository};
-use crate::service::{SendMailService, UseSendMailService};
+use crate::repository::CredentialRepository;
+use crate::service::SendMailService;
 use anyhow::Result;
+use std::sync::Arc;
 
-pub trait UseResetPasswordUseCase {
-    type ResetPasswordUseCase: ResetPasswordUseCase;
-    fn reset_password_use_case(&self) -> &Self::ResetPasswordUseCase;
+pub struct ResetPasswordUseCase {
+    credential_repository: Arc<dyn CredentialRepository>,
+    send_mail_service: Arc<dyn SendMailService>,
 }
 
-pub trait ResetPasswordUseCase: UseCredentialRepository + UseSendMailService {
-    fn reset_password(&self, mail_address: &MailAddress) -> Result<()> {
+impl ResetPasswordUseCase {
+    pub fn new(
+        credential_repository: Arc<dyn CredentialRepository>,
+        send_mail_service: Arc<dyn SendMailService>,
+    ) -> Self {
+        Self {
+            credential_repository,
+            send_mail_service,
+        }
+    }
+
+    pub fn reset_password(&self, mail_address: &MailAddress) -> Result<()> {
         match self
-            .credential_repository()
+            .credential_repository
             .find_by_mail_address(mail_address)?
         {
             None => Ok(()),
             Some(credential) => match credential.reset_password() {
                 Err(_) => Ok(()),
                 Ok(updated) => {
-                    self.credential_repository().save(&updated)?;
+                    self.credential_repository.save(&updated)?;
 
-                    self.send_mail_service().send_update_password_mail(&updated);
+                    self.send_mail_service.send_update_password_mail(&updated);
 
                     Ok(())
                 }
@@ -28,5 +39,3 @@ pub trait ResetPasswordUseCase: UseCredentialRepository + UseSendMailService {
         }
     }
 }
-
-impl<T: UseCredentialRepository + UseSendMailService> ResetPasswordUseCase for T {}

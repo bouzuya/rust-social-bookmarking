@@ -1,15 +1,17 @@
-use crate::service::{SessionService, UseSessionService};
+use crate::service::SessionService;
 use anyhow::Result;
+use std::sync::Arc;
 
-pub trait UseSignOutUseCase {
-    type SignOutUseCase: SignOutUseCase;
-    fn sign_out_use_case(&self) -> &Self::SignOutUseCase;
+pub struct SignOutUseCase {
+    session_service: Arc<dyn SessionService>,
 }
 
-pub trait SignOutUseCase: UseSessionService {
-    fn sign_out(&self) -> Result<()> {
-        self.session_service().set_current_user(None)
+impl SignOutUseCase {
+    pub fn new(session_service: Arc<dyn SessionService>) -> Self {
+        Self { session_service }
+    }
+
+    pub fn sign_out(&self) -> Result<()> {
+        self.session_service.set_current_user(None)
     }
 }
-
-impl<T: UseSessionService> SignOutUseCase for T {}

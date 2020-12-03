@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate diesel;
 
+mod app;
 mod cli;
 mod entity;
 mod fake;

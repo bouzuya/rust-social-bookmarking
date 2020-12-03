@@ -1,29 +1,38 @@
 use crate::entity::{BookmarkComment, BookmarkTitle, BookmarkUrl};
-use crate::repository::{BookmarkRepository, UseBookmarkRepository};
-use crate::service::{SessionService, UseSessionService};
+use crate::repository::BookmarkRepository;
+use crate::service::SessionService;
 use anyhow::{anyhow, Result};
+use std::sync::Arc;
 
-pub trait UseCreateBookmarkUseCase {
-    type CreateBookmarkUseCase: CreateBookmarkUseCase;
-    fn create_bookmark_use_case(&self) -> &Self::CreateBookmarkUseCase;
+pub struct CreateBookmarkUseCase {
+    bookmark_repository: Arc<dyn BookmarkRepository>,
+    session_service: Arc<dyn SessionService>,
 }
 
-pub trait CreateBookmarkUseCase: UseBookmarkRepository + UseSessionService {
-    fn create_bookmark(
+impl CreateBookmarkUseCase {
+    pub fn new(
+        bookmark_repository: Arc<dyn BookmarkRepository>,
+        session_service: Arc<dyn SessionService>,
+    ) -> Self {
+        Self {
+            bookmark_repository,
+            session_service,
+        }
+    }
+
+    pub fn create_bookmark(
         &self,
         url: BookmarkUrl,
         title: BookmarkTitle,
         comment: BookmarkComment,
     ) -> Result<()> {
-        return match self.session_service().get_current_user()? {
+        return match self.session_service.get_current_user()? {
             None => Err(anyhow!("unauthorized")),
             Some(current_user) => {
-                self.bookmark_repository()
+                self.bookmark_repository
                     .create(current_user.id(), url, title, comment)?;
                 Ok(())
             }
         };
     }
 }
-
-impl<T: UseBookmarkRepository + UseSessionService> CreateBookmarkUseCase for T {}

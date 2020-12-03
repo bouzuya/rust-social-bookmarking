@@ -1,19 +1,25 @@
 use crate::entity::{CredentialSecret, Password};
-use crate::repository::{CredentialRepository, UseCredentialRepository};
+use crate::repository::CredentialRepository;
 use anyhow::{anyhow, Result};
+use std::sync::Arc;
 
-pub trait UseUpdatePasswordBySecretUseCase {
-    type UpdatePasswordBySecretUseCase: UpdatePasswordBySecretUseCase;
-    fn update_password_by_secret_use_case(&self) -> &Self::UpdatePasswordBySecretUseCase;
+pub struct UpdatePasswordBySecretUseCase {
+    credential_repository: Arc<dyn CredentialRepository>,
 }
 
-pub trait UpdatePasswordBySecretUseCase: UseCredentialRepository {
-    fn update_password_by_secret(
+impl UpdatePasswordBySecretUseCase {
+    pub fn new(credential_repository: Arc<dyn CredentialRepository>) -> Self {
+        Self {
+            credential_repository,
+        }
+    }
+
+    pub fn update_password_by_secret(
         &self,
         secret: &CredentialSecret,
         password: &Password,
     ) -> Result<()> {
-        match self.credential_repository().find_by_secret(&secret)? {
+        match self.credential_repository.find_by_secret(&secret)? {
             None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
                 let verification = credential.verification().unwrap();
@@ -21,11 +27,9 @@ pub trait UpdatePasswordBySecretUseCase: UseCredentialRepository {
                     Err(anyhow!("forbidden: invalid secret"))
                 } else {
                     let updated = credential.update_password(password)?;
-                    self.credential_repository().save(&updated)
+                    self.credential_repository.save(&updated)
                 }
             }
         }
     }
 }
-
-impl<T: UseCredentialRepository> UpdatePasswordBySecretUseCase for T {}
