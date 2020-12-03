@@ -27,6 +27,7 @@ pub fn run() -> Result<()> {
                 .about("create-user")
                 .arg(clap::Arg::with_name("SECRET").help("secret").required(true)),
         )
+        .subcommand(clap::SubCommand::with_name("get-current-user").about("get-current-user"))
         .subcommand(
             clap::SubCommand::with_name("sign-in")
                 .about("sign-in")
@@ -64,6 +65,10 @@ pub fn run() -> Result<()> {
                 .parse()
                 .map_err(anyhow::Error::msg)?;
             app.create_user_use_case().create_user(secret)?;
+        }
+        ("get-current-user", Some(_)) => {
+            let current_user = app.get_current_user_use_case().get_current_user()?;
+            println!("{:?}", current_user);
         }
         ("sign-in", Some(sub_matches)) => {
             let mail_address = sub_matches
