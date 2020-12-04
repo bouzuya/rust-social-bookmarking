@@ -27,6 +27,17 @@ pub fn run() -> Result<()> {
                 .about("create-user")
                 .arg(clap::Arg::with_name("SECRET").help("secret").required(true)),
         )
+        .subcommand(
+            clap::SubCommand::with_name("create-bookmark")
+                .about("create-bookmark")
+                .arg(clap::Arg::with_name("URL").help("url").required(true))
+                .arg(clap::Arg::with_name("TITLE").help("title").required(true))
+                .arg(
+                    clap::Arg::with_name("COMMENT")
+                        .help("comment")
+                        .required(true),
+                ),
+        )
         .subcommand(clap::SubCommand::with_name("get-current-user").about("get-current-user"))
         .subcommand(
             clap::SubCommand::with_name("sign-in")
@@ -58,6 +69,25 @@ pub fn run() -> Result<()> {
         )
         .get_matches();
     match matches.subcommand() {
+        ("create-bookmark", Some(sub_matches)) => {
+            let url = sub_matches
+                .value_of("URL")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            let title = sub_matches
+                .value_of("TITLE")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            let comment = sub_matches
+                .value_of("COMMENT")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            app.create_bookmark_use_case()
+                .create_bookmark(url, title, comment)?;
+        }
         ("create-user", Some(sub_matches)) => {
             let secret = sub_matches
                 .value_of("SECRET")
