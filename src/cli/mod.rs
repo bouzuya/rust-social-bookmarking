@@ -40,6 +40,10 @@ pub fn run() -> Result<()> {
         )
         .subcommand(clap::SubCommand::with_name("get-current-user").about("get-current-user"))
         .subcommand(
+            clap::SubCommand::with_name("list-current-user-bookmarks")
+                .about("list-current-user-bookmarks"),
+        )
+        .subcommand(
             clap::SubCommand::with_name("sign-in")
                 .about("sign-in")
                 .arg(
@@ -99,6 +103,12 @@ pub fn run() -> Result<()> {
         ("get-current-user", Some(_)) => {
             let current_user = app.get_current_user_use_case().get_current_user()?;
             println!("{:?}", current_user);
+        }
+        ("list-current-user-bookmarks", Some(_)) => {
+            let bookmarks = app
+                .list_current_user_bookmarks_use_case()
+                .list_current_user_bookmarks()?;
+            println!("{:?}", bookmarks);
         }
         ("sign-in", Some(sub_matches)) => {
             let mail_address = sub_matches
