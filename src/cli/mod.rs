@@ -40,6 +40,15 @@ pub fn run() -> Result<()> {
         )
         .subcommand(clap::SubCommand::with_name("get-current-user").about("get-current-user"))
         .subcommand(
+            clap::SubCommand::with_name("list-bookmarks-by-user-key")
+                .about("list-bookmarks-by-user-key")
+                .arg(
+                    clap::Arg::with_name("USER_KEY")
+                        .help("user-key")
+                        .required(true),
+                ),
+        )
+        .subcommand(
             clap::SubCommand::with_name("list-current-user-bookmarks")
                 .about("list-current-user-bookmarks"),
         )
@@ -103,6 +112,17 @@ pub fn run() -> Result<()> {
         ("get-current-user", Some(_)) => {
             let current_user = app.get_current_user_use_case().get_current_user()?;
             println!("{:?}", current_user);
+        }
+        ("list-bookmarks-by-user-key", Some(sub_matches)) => {
+            let user_key = sub_matches
+                .value_of("USER_KEY")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            let bookmarks = app
+                .list_bookmarks_by_user_key_use_case()
+                .list_bookmarks_by_user_key(&user_key)?;
+            println!("{:?}", bookmarks);
         }
         ("list-current-user-bookmarks", Some(_)) => {
             let bookmarks = app
