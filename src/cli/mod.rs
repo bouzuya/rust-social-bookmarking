@@ -115,6 +115,15 @@ pub fn run() -> Result<()> {
                 ),
         )
         .subcommand(
+            clap::SubCommand::with_name("update-password")
+                .about("update-password")
+                .arg(
+                    clap::Arg::with_name("PASSWORD")
+                        .help("password")
+                        .required(true),
+                ),
+        )
+        .subcommand(
             clap::SubCommand::with_name("verify-mail-address")
                 .about("verify-mail-address")
                 .arg(clap::Arg::with_name("SECRET").help("secret").required(true)),
@@ -236,6 +245,14 @@ pub fn run() -> Result<()> {
                 .map_err(anyhow::Error::msg)?;
             app.update_mail_address_use_case()
                 .update_mail_address(&mail_address)?;
+        }
+        ("update-password", Some(sub_matches)) => {
+            let password = sub_matches
+                .value_of("PASSWORD")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            app.update_password_use_case().update_password(&password)?;
         }
         ("verify-mail-address", Some(sub_matches)) => {
             let secret = sub_matches
