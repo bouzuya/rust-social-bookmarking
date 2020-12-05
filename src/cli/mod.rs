@@ -62,6 +62,15 @@ pub fn run() -> Result<()> {
                 .about("list-current-user-bookmarks"),
         )
         .subcommand(
+            clap::SubCommand::with_name("reset-password")
+                .about("reset-password")
+                .arg(
+                    clap::Arg::with_name("MAIL_ADDRESS")
+                        .help("mail address")
+                        .required(true),
+                ),
+        )
+        .subcommand(
             clap::SubCommand::with_name("sign-in")
                 .about("sign-in")
                 .arg(
@@ -187,6 +196,15 @@ pub fn run() -> Result<()> {
                 .list_current_user_bookmarks_use_case()
                 .list_current_user_bookmarks()?;
             println!("{:?}", bookmarks);
+        }
+        ("reset-password", Some(sub_matches)) => {
+            let mail_address = sub_matches
+                .value_of("MAIL_ADDRESS")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            app.reset_password_use_case()
+                .reset_password(&mail_address)?;
         }
         ("sign-in", Some(sub_matches)) => {
             let mail_address = sub_matches
