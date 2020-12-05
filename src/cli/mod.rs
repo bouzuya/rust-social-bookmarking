@@ -134,6 +134,16 @@ pub fn run() -> Result<()> {
                 ),
         )
         .subcommand(
+            clap::SubCommand::with_name("update-password-by-secret")
+                .about("update-password-by-secret")
+                .arg(clap::Arg::with_name("SECRET").help("secret").required(true))
+                .arg(
+                    clap::Arg::with_name("PASSWORD")
+                        .help("password")
+                        .required(true),
+                ),
+        )
+        .subcommand(
             clap::SubCommand::with_name("verify-mail-address")
                 .about("verify-mail-address")
                 .arg(clap::Arg::with_name("SECRET").help("secret").required(true)),
@@ -275,6 +285,20 @@ pub fn run() -> Result<()> {
                 .parse()
                 .map_err(anyhow::Error::msg)?;
             app.update_password_use_case().update_password(&password)?;
+        }
+        ("update-password-by-secret", Some(sub_matches)) => {
+            let secret = sub_matches
+                .value_of("SECRET")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            let password = sub_matches
+                .value_of("PASSWORD")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            app.update_password_by_secret_use_case()
+                .update_password_by_secret(&secret, &password)?;
         }
         ("verify-mail-address", Some(sub_matches)) => {
             let secret = sub_matches
