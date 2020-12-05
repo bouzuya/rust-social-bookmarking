@@ -25,8 +25,8 @@ impl UpdatePasswordBySecretUseCase {
         {
             None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
-                let verification = credential.verification().unwrap();
-                if verification.expired() {
+                let password_reset = credential.password_reset().unwrap();
+                if password_reset.expired() {
                     Err(anyhow!("forbidden: invalid secret"))
                 } else {
                     let updated = credential.update_password(password)?;
