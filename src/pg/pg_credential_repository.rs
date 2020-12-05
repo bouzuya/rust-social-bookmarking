@@ -291,12 +291,12 @@ impl CredentialRepository for PgCredentialRepository {
     }
 
     fn save(&self, credential: &Credential) -> Result<()> {
+        diesel::delete(credential_password_reset::table)
+            .filter(credential_password_reset::credential_id.eq(i32::from(credential.id())))
+            .execute(self.connection.as_ref())
+            .map(|_| ())
+            .map_err(anyhow::Error::msg)?;
         if let Some(row) = CredentialPasswordResetRow::try_from(credential).ok() {
-            diesel::delete(credential_password_reset::table)
-                .filter(credential_password_reset::credential_id.eq(i32::from(credential.id())))
-                .execute(self.connection.as_ref())
-                .map(|_| ())
-                .map_err(anyhow::Error::msg)?;
             diesel::insert_into(credential_password_reset::table)
                 .values(row)
                 .execute(self.connection.as_ref())
@@ -315,18 +315,25 @@ impl CredentialRepository for PgCredentialRepository {
                 .map_err(anyhow::Error::msg)?;
         }
 
+        diesel::delete(credential_verified::table)
+            .filter(credential_verified::credential_id.eq(i32::from(credential.id())))
+            .execute(self.connection.as_ref())
+            .map(|_| ())
+            .map_err(anyhow::Error::msg)?;
         if let Some(row) = CredentialVerifiedRow::try_from(credential).ok() {
-            diesel::delete(credential_verified::table)
-                .filter(credential_verified::credential_id.eq(i32::from(credential.id())))
-                .execute(self.connection.as_ref())
-                .map(|_| ())
-                .map_err(anyhow::Error::msg)?;
             diesel::insert_into(credential_verified::table)
                 .values(row)
                 .execute(self.connection.as_ref())
                 .map(|_| ())
                 .map_err(anyhow::Error::msg)?;
         }
+
+        diesel::update(credential::table)
+            .set(credential::columns::password.eq(String::from(credential.password())))
+            .filter(credential::columns::id.eq(i32::from(credential.id())))
+            .execute(self.connection.as_ref())
+            .map(|_| ())
+            .map_err(anyhow::Error::msg)?;
 
         Ok(())
     }
@@ -389,6 +396,17 @@ mod tests {
 
                 assert_eq!(found, vec![reset.clone()]);
             }
+
+            {
+                let password = "password1234".parse().unwrap();
+                let updated = reset.update_password(&password)?;
+                repository.save(&updated)?;
+
+                let found = repository.find_by_mail_address(&updated.mail_address())?;
+                assert_eq!(found, Some(updated.clone()));
+
+                updated
+            };
 
             {
                 repository.delete(&reset.id())?;
