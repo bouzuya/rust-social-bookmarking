@@ -105,6 +105,15 @@ pub fn run() -> Result<()> {
                         .required(true),
                 ),
         )
+        .subcommand(
+            clap::SubCommand::with_name("update-mail-address")
+                .about("update-mail-address")
+                .arg(
+                    clap::Arg::with_name("MAIL_ADDRESS")
+                        .help("mail address")
+                        .required(true),
+                ),
+        )
         .get_matches();
     match matches.subcommand() {
         ("create-bookmark", Some(sub_matches)) => {
@@ -213,6 +222,15 @@ pub fn run() -> Result<()> {
                 .map_err(anyhow::Error::msg)?;
             app.update_bookmark_use_case()
                 .update_bookmark(bookmark_key, url, title, comment)?;
+        }
+        ("update-mail-address", Some(sub_matches)) => {
+            let mail_address = sub_matches
+                .value_of("MAIL_ADDRESS")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            app.update_mail_address_use_case()
+                .update_mail_address(&mail_address)?;
         }
         _ => {}
     }
