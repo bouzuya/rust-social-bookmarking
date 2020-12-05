@@ -32,6 +32,10 @@ impl CredentialRepository for CredentialRepositoryImpl {
         todo!()
     }
 
+    fn find_by_password_reset_secret(&self, _: &CredentialSecret) -> Result<Option<Credential>> {
+        todo!()
+    }
+
     fn find_by_verification_secret(&self, _: &CredentialSecret) -> Result<Option<Credential>> {
         todo!()
     }

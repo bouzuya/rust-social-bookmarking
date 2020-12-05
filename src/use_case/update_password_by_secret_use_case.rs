@@ -21,7 +21,7 @@ impl UpdatePasswordBySecretUseCase {
     ) -> Result<()> {
         match self
             .credential_repository
-            .find_by_verification_secret(&secret)?
+            .find_by_password_reset_secret(&secret)?
         {
             None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {

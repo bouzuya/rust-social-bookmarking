@@ -277,6 +277,22 @@ impl CredentialRepository for PgCredentialRepository {
         found.map(Self::credential_from_row).transpose()
     }
 
+    fn find_by_password_reset_secret(
+        &self,
+        secret: &CredentialSecret,
+    ) -> Result<Option<Credential>> {
+        let found = credential::table
+            .left_outer_join(credential_password_reset::table)
+            .left_outer_join(credential_verification::table)
+            .left_outer_join(credential_verified::table)
+            .select(Self::columns())
+            .filter(credential_password_reset::secret.eq(secret.to_string()))
+            .first(self.connection.as_ref())
+            .optional()
+            .map_err(anyhow::Error::msg)?;
+        found.map(Self::credential_from_row).transpose()
+    }
+
     fn find_by_verification_secret(&self, secret: &CredentialSecret) -> Result<Option<Credential>> {
         let found = credential::table
             .left_outer_join(credential_password_reset::table)
@@ -398,6 +414,10 @@ mod tests {
             }
 
             {
+                let secret = reset.password_reset().unwrap().secret();
+                let found = repository.find_by_password_reset_secret(&secret)?;
+                assert_eq!(found, Some(reset.clone()));
+
                 let password = "password1234".parse().unwrap();
                 let updated = reset.update_password(&password)?;
                 repository.save(&updated)?;
