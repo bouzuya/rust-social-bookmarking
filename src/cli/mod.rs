@@ -47,6 +47,15 @@ pub fn run() -> Result<()> {
                         .required(true),
                 ),
         )
+        .subcommand(
+            clap::SubCommand::with_name("delete-user")
+                .about("delete-user")
+                .arg(
+                    clap::Arg::with_name("USER_KEY")
+                        .help("user key")
+                        .required(true),
+                ),
+        )
         .subcommand(clap::SubCommand::with_name("get-current-user").about("get-current-user"))
         .subcommand(
             clap::SubCommand::with_name("list-bookmarks-by-user-key")
@@ -185,6 +194,14 @@ pub fn run() -> Result<()> {
                 .map_err(anyhow::Error::msg)?;
             app.delete_bookmark_use_case()
                 .delete_bookmark(&bookmark_key)?;
+        }
+        ("delete-user", Some(sub_matches)) => {
+            let user_key = sub_matches
+                .value_of("USER_KEY")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            app.delete_user_use_case().delete_user(&user_key)?;
         }
         ("get-current-user", Some(_)) => {
             let current_user = app.get_current_user_use_case().get_current_user()?;
