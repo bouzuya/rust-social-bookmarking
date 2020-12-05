@@ -75,6 +75,7 @@ pub fn run() -> Result<()> {
                         .required(true),
                 ),
         )
+        .subcommand(clap::SubCommand::with_name("sign-out").about("sign-out"))
         .subcommand(
             clap::SubCommand::with_name("sign-up")
                 .about("sign-up")
@@ -199,6 +200,9 @@ pub fn run() -> Result<()> {
                 .parse()
                 .map_err(anyhow::Error::msg)?;
             app.sign_in_use_case().sign_in(&mail_address, &password)?;
+        }
+        ("sign-out", Some(_)) => {
+            app.sign_out_use_case().sign_out()?;
         }
         ("sign-up", Some(sub_matches)) => {
             let mail_address = sub_matches
