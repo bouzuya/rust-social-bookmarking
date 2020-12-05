@@ -114,6 +114,11 @@ pub fn run() -> Result<()> {
                         .required(true),
                 ),
         )
+        .subcommand(
+            clap::SubCommand::with_name("verify-mail-address")
+                .about("verify-mail-address")
+                .arg(clap::Arg::with_name("SECRET").help("secret").required(true)),
+        )
         .get_matches();
     match matches.subcommand() {
         ("create-bookmark", Some(sub_matches)) => {
@@ -231,6 +236,15 @@ pub fn run() -> Result<()> {
                 .map_err(anyhow::Error::msg)?;
             app.update_mail_address_use_case()
                 .update_mail_address(&mail_address)?;
+        }
+        ("verify-mail-address", Some(sub_matches)) => {
+            let secret = sub_matches
+                .value_of("SECRET")
+                .unwrap()
+                .parse()
+                .map_err(anyhow::Error::msg)?;
+            app.verify_mail_address_use_case()
+                .verify_mail_address(&secret)?;
         }
         _ => {}
     }
