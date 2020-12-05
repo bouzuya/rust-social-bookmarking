@@ -32,7 +32,7 @@ impl CredentialRepository for CredentialRepositoryImpl {
         todo!()
     }
 
-    fn find_by_secret(&self, _: &CredentialSecret) -> Result<Option<Credential>> {
+    fn find_by_verification_secret(&self, _: &CredentialSecret) -> Result<Option<Credential>> {
         todo!()
     }
 

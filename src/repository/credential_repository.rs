@@ -9,7 +9,7 @@ pub trait UseCredentialRepository {
 pub trait CredentialRepository {
     fn find_by_user_id(&self, user_id: &UserId) -> Result<Vec<Credential>>;
     fn find_by_mail_address(&self, mail_address: &MailAddress) -> Result<Option<Credential>>;
-    fn find_by_secret(&self, secret: &CredentialSecret) -> Result<Option<Credential>>;
+    fn find_by_verification_secret(&self, secret: &CredentialSecret) -> Result<Option<Credential>>;
     fn create(
         &self,
         user_id: UserId,

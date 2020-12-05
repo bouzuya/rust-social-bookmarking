@@ -277,7 +277,7 @@ impl CredentialRepository for PgCredentialRepository {
         found.map(Self::credential_from_row).transpose()
     }
 
-    fn find_by_secret(&self, secret: &CredentialSecret) -> Result<Option<Credential>> {
+    fn find_by_verification_secret(&self, secret: &CredentialSecret) -> Result<Option<Credential>> {
         let found = credential::table
             .left_outer_join(credential_password_reset::table)
             .left_outer_join(credential_verification::table)
@@ -366,7 +366,7 @@ mod tests {
 
             {
                 let secret = created.verification().unwrap().secret();
-                let found = repository.find_by_secret(&secret)?;
+                let found = repository.find_by_verification_secret(&secret)?;
 
                 assert_eq!(found, Some(created.clone()));
             }

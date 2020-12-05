@@ -19,7 +19,10 @@ impl UpdatePasswordBySecretUseCase {
         secret: &CredentialSecret,
         password: &Password,
     ) -> Result<()> {
-        match self.credential_repository.find_by_secret(&secret)? {
+        match self
+            .credential_repository
+            .find_by_verification_secret(&secret)?
+        {
             None => Err(anyhow!("forbidden: invalid secret")),
             Some(credential) => {
                 let verification = credential.verification().unwrap();
