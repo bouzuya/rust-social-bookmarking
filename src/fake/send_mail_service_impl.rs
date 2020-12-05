@@ -35,7 +35,7 @@ impl SendMailService for SendMailServiceImpl {
         println!("      https://example.com/users/{:?}", user.key());
     }
 
-    fn send_verify_mail_address_mail(&self, _: &Credential) {
-        todo!()
+    fn send_verify_mail_address_mail(&self, credential: &Credential) {
+        println!("send_verify_mail_address: {:?}", credential);
     }
 }
