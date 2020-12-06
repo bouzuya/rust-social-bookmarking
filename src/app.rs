@@ -51,7 +51,12 @@ impl App {
     }
 
     pub fn delete_user_use_case(&self) -> DeleteUserUseCase {
-        DeleteUserUseCase::new(self.session_service.clone(), self.user_repository.clone())
+        DeleteUserUseCase::new(
+            self.session_service.clone(),
+            self.bookmark_repository.clone(),
+            self.credential_repository.clone(),
+            self.user_repository.clone(),
+        )
     }
 
     pub fn get_current_user_use_case(&self) -> GetCurrentUserUseCase {
