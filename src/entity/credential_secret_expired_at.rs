@@ -25,3 +25,21 @@ impl From<CredentialSecretExpiredAt> for NaiveDateTime {
         expired_at.0.naive_utc()
     }
 }
+
+impl std::fmt::Display for CredentialSecretExpiredAt {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "{:?}", self.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_to_string() {
+        let dt = "2020-12-06T22:23:24".parse::<NaiveDateTime>().unwrap();
+        let expired_at = CredentialSecretExpiredAt::from(dt);
+        assert_eq!("2020-12-06T22:23:24Z".to_owned(), expired_at.to_string());
+    }
+}
