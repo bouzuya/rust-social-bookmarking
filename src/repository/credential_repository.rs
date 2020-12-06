@@ -21,5 +21,6 @@ pub trait CredentialRepository {
         password: &Password,
     ) -> Result<Credential>;
     fn delete(&self, credential_id: &CredentialId) -> Result<()>;
+    fn delete_by_user_id(&self, user_id: &UserId) -> Result<()>;
     fn save(&self, credential: &Credential) -> Result<()>;
 }

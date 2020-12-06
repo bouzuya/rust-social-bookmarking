@@ -45,6 +45,10 @@ impl CredentialRepository for CredentialRepositoryImpl {
         Ok(())
     }
 
+    fn delete_by_user_id(&self, _: &UserId) -> Result<()> {
+        todo!()
+    }
+
     fn save(&self, _: &Credential) -> Result<()> {
         println!("CredentialRepository#save");
         Ok(())
