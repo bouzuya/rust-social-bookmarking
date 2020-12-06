@@ -32,6 +32,10 @@ impl BookmarkRepository for BookmarkRepositoryImpl {
         todo!()
     }
 
+    fn delete_by_user_id(&self, _: &UserId) -> Result<()> {
+        todo!()
+    }
+
     fn find_by_key(&self, _: &BookmarkKey) -> Result<Option<Bookmark>> {
         todo!()
     }

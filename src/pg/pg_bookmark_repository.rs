@@ -99,6 +99,14 @@ impl BookmarkRepository for PgBookmarkRepository {
             .map_err(anyhow::Error::msg)
     }
 
+    fn delete_by_user_id(&self, user_id: &UserId) -> Result<()> {
+        diesel::delete(bookmark::table)
+            .filter(bookmark::columns::user_id.eq(i32::from(user_id.clone())))
+            .execute(self.connection.as_ref())
+            .map(|_| ())
+            .map_err(anyhow::Error::msg)
+    }
+
     fn find_by_key(&self, key: &BookmarkKey) -> Result<Option<Bookmark>> {
         let found = bookmark::table
             .select(Self::columns())
@@ -193,7 +201,28 @@ mod tests {
                 repository.delete(&updated.id())?;
 
                 assert_eq!(repository.find_by_key(&found.key())?, None);
-            };
+            }
+
+            {
+                {
+                    let url = "https://bouzuya.net".parse().unwrap();
+                    let title = "bouzuya.net".parse().unwrap();
+                    let comment = "bouzuya's website".parse().unwrap();
+                    repository.create(user.id(), url, title, comment)?;
+                }
+                {
+                    let url = "https://blog.bouzuya.net".parse().unwrap();
+                    let title = "blog.bouzuya.net".parse().unwrap();
+                    let comment = "bouzuya's weblog".parse().unwrap();
+                    repository.create(user.id(), url, title, comment)?;
+                }
+
+                let found = repository.find_by_user_id(&updated.user_id())?;
+                assert_eq!(found.len(), 2);
+                repository.delete_by_user_id(&user.id())?;
+                let found = repository.find_by_user_id(&updated.user_id())?;
+                assert_eq!(found.len(), 0);
+            }
 
             Ok(())
         });

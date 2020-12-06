@@ -19,6 +19,8 @@ pub trait BookmarkRepository {
 
     fn delete(&self, _: &BookmarkId) -> Result<()>;
 
+    fn delete_by_user_id(&self, _: &UserId) -> Result<()>;
+
     fn find_by_key(&self, _: &BookmarkKey) -> Result<Option<Bookmark>>;
 
     fn find_by_user_id(&self, _: &UserId) -> Result<Vec<Bookmark>>;
