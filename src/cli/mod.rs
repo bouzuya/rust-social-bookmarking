@@ -1,8 +1,8 @@
 mod console_send_mail_service;
 mod fs_session_service;
 
-use crate::cli::console_send_mail_service::ConsoleSendMailService;
-use crate::cli::fs_session_service::FsSessionService;
+pub use crate::cli::console_send_mail_service::ConsoleSendMailService;
+pub use crate::cli::fs_session_service::FsSessionService;
 use crate::pg::*;
 use anyhow::Result;
 use diesel::{Connection, PgConnection};
