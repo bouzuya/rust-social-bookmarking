@@ -2,19 +2,22 @@ use crate::entity::{Bookmark, BookmarkId, BookmarkKey, UserId};
 use crate::repository::BookmarkRepository;
 use crate::schema::bookmark;
 use anyhow::Result;
-use diesel::{prelude::*, sql_types::*};
+use diesel::{
+    prelude::*,
+    r2d2::{ConnectionManager, Pool},
+    sql_types::*,
+};
 use std::convert::{TryFrom, TryInto};
-use std::sync::Arc;
 
 sql_function!(fn nextval(x: Text) -> BigInt);
 
 pub struct PgBookmarkRepository {
-    connection: Arc<PgConnection>,
+    pool: Pool<ConnectionManager<PgConnection>>,
 }
 
 impl PgBookmarkRepository {
-    pub fn new(connection: Arc<PgConnection>) -> Self {
-        Self { connection }
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
+        Self { pool }
     }
 
     fn columns() -> (
@@ -80,48 +83,52 @@ impl BookmarkRepository for PgBookmarkRepository {
         title: crate::entity::BookmarkTitle,
         comment: crate::entity::BookmarkComment,
     ) -> Result<Bookmark> {
-        let id =
-            diesel::select(nextval("bookmark_id")).get_result::<i64>(self.connection.as_ref())?;
+        let connection = self.pool.get()?;
+        let id = diesel::select(nextval("bookmark_id")).get_result::<i64>(&connection)?;
         let bookmark_id = BookmarkId::try_from(id as i32).map_err(anyhow::Error::msg)?;
         let bookmark = Bookmark::new(bookmark_id, user_id, url, title, comment);
         diesel::insert_into(bookmark::table)
             .values(BookmarkRow::from(&bookmark))
-            .execute(self.connection.as_ref())
+            .execute(&connection)
             .map(|_| bookmark)
             .map_err(anyhow::Error::msg)
     }
 
     fn delete(&self, bookmark_id: &BookmarkId) -> Result<()> {
+        let connection = self.pool.get()?;
         diesel::delete(bookmark::table)
             .filter(bookmark::columns::id.eq(i32::from(bookmark_id.clone())))
-            .execute(self.connection.as_ref())
+            .execute(&connection)
             .map(|_| ())
             .map_err(anyhow::Error::msg)
     }
 
     fn delete_by_user_id(&self, user_id: &UserId) -> Result<()> {
+        let connection = self.pool.get()?;
         diesel::delete(bookmark::table)
             .filter(bookmark::columns::user_id.eq(i32::from(user_id.clone())))
-            .execute(self.connection.as_ref())
+            .execute(&connection)
             .map(|_| ())
             .map_err(anyhow::Error::msg)
     }
 
     fn find_by_key(&self, key: &BookmarkKey) -> Result<Option<Bookmark>> {
+        let connection = self.pool.get()?;
         let found = bookmark::table
             .select(Self::columns())
             .filter(bookmark::columns::key.eq(String::from(key.clone())))
-            .first(self.connection.as_ref())
+            .first(&connection)
             .optional()
             .map_err(anyhow::Error::msg)?;
         found.map(Self::from_row).transpose()
     }
 
     fn find_by_user_id(&self, user_id: &UserId) -> Result<Vec<Bookmark>> {
+        let connection = self.pool.get()?;
         bookmark::table
             .select(Self::columns())
             .filter(bookmark::columns::user_id.eq(i32::from(user_id.clone())))
-            .get_results(self.connection.as_ref())
+            .get_results(&connection)
             .map(|rows| {
                 rows.into_iter()
                     .filter_map(|row| Self::from_row(row).ok())
@@ -131,10 +138,11 @@ impl BookmarkRepository for PgBookmarkRepository {
     }
 
     fn save(&self, b: &Bookmark) -> Result<()> {
+        let connection = self.pool.get()?;
         diesel::update(bookmark::table)
             .set(BookmarkRow::from(b))
             .filter(bookmark::columns::id.eq(i32::from(b.id())))
-            .execute(self.connection.as_ref())
+            .execute(&connection)
             .map(|_| ())
             .map_err(anyhow::Error::msg)
     }
@@ -152,11 +160,11 @@ mod tests {
 
     #[test]
     fn test_scenario() {
-        transaction(|connection| {
+        transaction(|pool| {
             let user = {
-                let user_repository = PgUserRepository::new(connection.clone());
+                let user_repository = PgUserRepository::new(pool.clone());
                 let user = user_repository.create()?;
-                let credential_repository = PgCredentialRepository::new(connection.clone());
+                let credential_repository = PgCredentialRepository::new(pool.clone());
                 let mail_address = "m@bouzuya.net".parse().unwrap();
                 let password = "password".parse().unwrap();
                 let created = credential_repository.create(user.id(), &mail_address, &password)?;
@@ -165,7 +173,7 @@ mod tests {
                 credential_repository.save(&verified)?;
                 user
             };
-            let repository = PgBookmarkRepository::new(connection.clone());
+            let repository = PgBookmarkRepository::new(pool.clone());
 
             let created = {
                 let url = "https://bouzuya.net".parse().unwrap();
@@ -230,15 +238,15 @@ mod tests {
 
     fn transaction<F>(f: F)
     where
-        F: FnOnce(Arc<PgConnection>) -> Result<()>,
+        F: FnOnce(Pool<ConnectionManager<PgConnection>>) -> Result<()>,
     {
         dotenv::dotenv().ok();
         let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-        let connection = PgConnection::establish(&database_url)
+        let manager = ConnectionManager::<PgConnection>::new(&database_url);
+        let pool = Pool::builder()
+            .build(manager)
             .expect(&format!("Error connecting to {}", database_url));
-        let connection = Arc::new(connection);
-        connection
-            .as_ref()
-            .test_transaction::<(), anyhow::Error, _>(|| f(connection.clone()))
+        let connection = pool.get().expect("connection");
+        connection.test_transaction::<(), anyhow::Error, _>(|| f(pool.clone()))
     }
 }

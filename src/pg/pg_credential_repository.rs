@@ -9,19 +9,23 @@ use crate::schema::{
 };
 use anyhow::{anyhow, Result};
 use chrono::NaiveDateTime;
-use diesel::{expression::nullable::Nullable, prelude::*, sql_types::*};
+use diesel::{
+    expression::nullable::Nullable,
+    prelude::*,
+    r2d2::{ConnectionManager, Pool},
+    sql_types::*,
+};
 use std::convert::TryFrom;
-use std::sync::Arc;
 
 sql_function!(fn nextval(x: Text) -> BigInt);
 
 pub struct PgCredentialRepository {
-    connection: Arc<PgConnection>,
+    pool: Pool<ConnectionManager<PgConnection>>,
 }
 
 impl PgCredentialRepository {
-    pub fn new(connection: Arc<PgConnection>) -> Self {
-        Self { connection }
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
+        Self { pool }
     }
 
     fn columns() -> (
@@ -207,47 +211,50 @@ impl CredentialRepository for PgCredentialRepository {
         mail_address: &MailAddress,
         password: &Password,
     ) -> Result<Credential> {
-        let id =
-            diesel::select(nextval("credential_id")).get_result::<i64>(self.connection.as_ref())?;
+        let connection = self.pool.get()?;
+        let id = diesel::select(nextval("credential_id")).get_result::<i64>(&connection)?;
         let credential_id = CredentialId::try_from(id as i32).map_err(anyhow::Error::msg)?;
         let credential = Credential::new(credential_id, user_id, mail_address, password);
         diesel::insert_into(credential::table)
             .values(CredentialRow::from(&credential))
-            .execute(self.connection.as_ref())
+            .execute(&connection)
             .map_err(anyhow::Error::msg)?;
         if let Some(verification) = CredentialVerificationRow::try_from(&credential).ok() {
             diesel::insert_into(credential_verification::table)
                 .values(verification)
-                .execute(self.connection.as_ref())
+                .execute(&connection)
                 .map_err(anyhow::Error::msg)?;
         }
         Ok(credential)
     }
 
     fn delete(&self, credential_id: &CredentialId) -> Result<()> {
+        let connection = self.pool.get()?;
         diesel::delete(credential::table)
             .filter(credential::columns::id.eq(i32::from(credential_id.clone())))
-            .execute(self.connection.as_ref())
+            .execute(&connection)
             .map(|_| ())
             .map_err(anyhow::Error::msg)
     }
 
     fn delete_by_user_id(&self, user_id: &UserId) -> Result<()> {
+        let connection = self.pool.get()?;
         diesel::delete(credential::table)
             .filter(credential::columns::user_id.eq(i32::from(user_id.clone())))
-            .execute(self.connection.as_ref())
+            .execute(&connection)
             .map(|_| ())
             .map_err(anyhow::Error::msg)
     }
 
     fn find_by_user_id(&self, user_id: &UserId) -> Result<Vec<Credential>> {
+        let connection = self.pool.get()?;
         credential::table
             .left_outer_join(credential_password_reset::table)
             .left_outer_join(credential_verification::table)
             .left_outer_join(credential_verified::table)
             .select(Self::columns())
             .filter(credential::user_id.eq(i32::from(user_id.clone())))
-            .get_results(self.connection.as_ref())
+            .get_results(&connection)
             .map(|rows| {
                 rows.into_iter()
                     .filter_map(|row| Self::credential_from_row(row).ok())
@@ -257,13 +264,14 @@ impl CredentialRepository for PgCredentialRepository {
     }
 
     fn find_by_mail_address(&self, mail_address: &MailAddress) -> Result<Option<Credential>> {
+        let connection = self.pool.get()?;
         let found = credential::table
             .left_outer_join(credential_password_reset::table)
             .left_outer_join(credential_verification::table)
             .left_outer_join(credential_verified::table)
             .select(Self::columns())
             .filter(credential::mail_address.eq(mail_address.to_string()))
-            .first(self.connection.as_ref())
+            .first(&connection)
             .optional()
             .map_err(anyhow::Error::msg)?;
         found.map(Self::credential_from_row).transpose()
@@ -273,41 +281,44 @@ impl CredentialRepository for PgCredentialRepository {
         &self,
         secret: &CredentialSecret,
     ) -> Result<Option<Credential>> {
+        let connection = self.pool.get()?;
         let found = credential::table
             .left_outer_join(credential_password_reset::table)
             .left_outer_join(credential_verification::table)
             .left_outer_join(credential_verified::table)
             .select(Self::columns())
             .filter(credential_password_reset::secret.eq(secret.to_string()))
-            .first(self.connection.as_ref())
+            .first(&connection)
             .optional()
             .map_err(anyhow::Error::msg)?;
         found.map(Self::credential_from_row).transpose()
     }
 
     fn find_by_verification_secret(&self, secret: &CredentialSecret) -> Result<Option<Credential>> {
+        let connection = self.pool.get()?;
         let found = credential::table
             .left_outer_join(credential_password_reset::table)
             .left_outer_join(credential_verification::table)
             .left_outer_join(credential_verified::table)
             .select(Self::columns())
             .filter(credential_verification::secret.eq(secret.to_string()))
-            .first(self.connection.as_ref())
+            .first(&connection)
             .optional()
             .map_err(anyhow::Error::msg)?;
         found.map(Self::credential_from_row).transpose()
     }
 
     fn save(&self, credential: &Credential) -> Result<()> {
+        let connection = self.pool.get()?;
         diesel::delete(credential_password_reset::table)
             .filter(credential_password_reset::credential_id.eq(i32::from(credential.id())))
-            .execute(self.connection.as_ref())
+            .execute(&connection)
             .map(|_| ())
             .map_err(anyhow::Error::msg)?;
         if let Some(row) = CredentialPasswordResetRow::try_from(credential).ok() {
             diesel::insert_into(credential_password_reset::table)
                 .values(row)
-                .execute(self.connection.as_ref())
+                .execute(&connection)
                 .map(|_| ())
                 .map_err(anyhow::Error::msg)?;
         }
@@ -318,20 +329,20 @@ impl CredentialRepository for PgCredentialRepository {
         {
             diesel::delete(credential_verification::table)
                 .filter(credential_verification::credential_id.eq(i32::from(credential.id())))
-                .execute(self.connection.as_ref())
+                .execute(&connection)
                 .map(|_| ())
                 .map_err(anyhow::Error::msg)?;
         }
 
         diesel::delete(credential_verified::table)
             .filter(credential_verified::credential_id.eq(i32::from(credential.id())))
-            .execute(self.connection.as_ref())
+            .execute(&connection)
             .map(|_| ())
             .map_err(anyhow::Error::msg)?;
         if let Some(row) = CredentialVerifiedRow::try_from(credential).ok() {
             diesel::insert_into(credential_verified::table)
                 .values(row)
-                .execute(self.connection.as_ref())
+                .execute(&connection)
                 .map(|_| ())
                 .map_err(anyhow::Error::msg)?;
         }
@@ -339,7 +350,7 @@ impl CredentialRepository for PgCredentialRepository {
         diesel::update(credential::table)
             .set(credential::columns::password.eq(String::from(credential.password())))
             .filter(credential::columns::id.eq(i32::from(credential.id())))
-            .execute(self.connection.as_ref())
+            .execute(&connection)
             .map(|_| ())
             .map_err(anyhow::Error::msg)?;
 
@@ -355,12 +366,12 @@ mod tests {
 
     #[test]
     fn test_scenario() {
-        transaction(|connection| {
+        transaction(|pool| {
             let user = {
-                let user_repository = PgUserRepository::new(connection.clone());
+                let user_repository = PgUserRepository::new(pool.clone());
                 user_repository.create()?
             };
-            let repository = PgCredentialRepository::new(connection.clone());
+            let repository = PgCredentialRepository::new(pool.clone());
 
             let created = {
                 let mail_address = "m@bouzuya.net".parse().unwrap();
@@ -452,15 +463,15 @@ mod tests {
 
     fn transaction<F>(f: F)
     where
-        F: FnOnce(Arc<PgConnection>) -> Result<()>,
+        F: FnOnce(Pool<ConnectionManager<PgConnection>>) -> Result<()>,
     {
         dotenv::dotenv().ok();
         let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-        let connection = PgConnection::establish(&database_url)
+        let manager = ConnectionManager::<PgConnection>::new(&database_url);
+        let pool = Pool::builder()
+            .build(manager)
             .expect(&format!("Error connecting to {}", database_url));
-        let connection = Arc::new(connection);
-        connection
-            .as_ref()
-            .test_transaction::<(), anyhow::Error, _>(|| f(connection.clone()))
+        let connection = pool.get().expect("connection");
+        connection.test_transaction::<(), anyhow::Error, _>(|| f(pool.clone()))
     }
 }
