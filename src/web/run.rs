@@ -9,6 +9,7 @@ use diesel::{
 };
 use serde::Deserialize;
 use std::sync::Arc;
+use web::{delete, post, Data, Json, Path};
 
 pub async fn run() -> Result<()> {
     dotenv::dotenv().ok();
@@ -37,8 +38,8 @@ struct CreateBookmarkRequestBody {
 }
 
 async fn create_bookmark(
-    app: web::Data<crate::app::App>,
-    json: web::Json<CreateBookmarkRequestBody>,
+    app: Data<crate::app::App>,
+    json: Json<CreateBookmarkRequestBody>,
 ) -> actix_web::Result<String> {
     let url = json
         .url
@@ -64,8 +65,8 @@ struct CreateUserRequestBody {
 }
 
 async fn create_user(
-    app: web::Data<crate::app::App>,
-    json: web::Json<CreateUserRequestBody>,
+    app: Data<crate::app::App>,
+    json: Json<CreateUserRequestBody>,
 ) -> actix_web::Result<String> {
     let secret = json
         .secret
@@ -83,8 +84,8 @@ struct DeleteBookmarkPath {
 }
 
 async fn delete_bookmark(
-    app: web::Data<crate::app::App>,
-    path: web::Path<DeleteBookmarkPath>,
+    app: Data<crate::app::App>,
+    path: Path<DeleteBookmarkPath>,
 ) -> actix_web::Result<String> {
     let bookmark_key = path
         .bookmark_key
@@ -102,8 +103,8 @@ struct DeleteUserPath {
 }
 
 async fn delete_user(
-    app: web::Data<crate::app::App>,
-    path: web::Path<DeleteUserPath>,
+    app: Data<crate::app::App>,
+    path: Path<DeleteUserPath>,
 ) -> actix_web::Result<String> {
     let user_key = path
         .user_key
@@ -116,17 +117,14 @@ async fn delete_user(
 }
 
 async fn main(app: crate::app::App) -> Result<()> {
-    let app_data = web::Data::new(app);
+    let app_data = Data::new(app);
     HttpServer::new(move || {
         App::new()
             .app_data(app_data.clone())
-            .route("/bookmarks", web::post().to(create_bookmark))
-            .route(
-                "/bookmarks/{bookmark_key}",
-                web::delete().to(delete_bookmark),
-            )
-            .route("/users", web::post().to(create_user))
-            .route("/users/{user_key}", web::delete().to(delete_user))
+            .route("/bookmarks", post().to(create_bookmark))
+            .route("/bookmarks/{bookmark_key}", delete().to(delete_bookmark))
+            .route("/users", post().to(create_user))
+            .route("/users/{user_key}", delete().to(delete_user))
     })
     .bind("127.0.0.1:8080")?
     .run()
