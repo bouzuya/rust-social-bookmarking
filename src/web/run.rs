@@ -1,12 +1,13 @@
 use crate::cli::ConsoleSendMailService;
 use crate::cli::FsSessionService;
 use crate::pg::*;
-use actix_web::{web, App, HttpRequest, HttpServer, Responder};
+use actix_web::{web, App, HttpServer};
 use anyhow::Result;
 use diesel::{
     r2d2::{ConnectionManager, Pool},
     PgConnection,
 };
+use serde::Deserialize;
 use std::sync::Arc;
 
 pub async fn run() -> Result<()> {
@@ -28,16 +29,41 @@ pub async fn run() -> Result<()> {
     main(app).await
 }
 
-async fn greet(req: HttpRequest) -> impl Responder {
-    let name = req.match_info().get("name").unwrap_or("World");
-    format!("Hello {}!", &name)
+#[derive(Debug, Deserialize)]
+struct CreateBookmarkRequestBody {
+    url: String,
+    title: String,
+    comment: String,
 }
 
-async fn main(_: crate::app::App) -> Result<()> {
-    HttpServer::new(|| {
+async fn create_bookmark(
+    app: web::Data<crate::app::App>,
+    json: web::Json<CreateBookmarkRequestBody>,
+) -> actix_web::Result<String> {
+    let url = json
+        .url
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    let title = json
+        .title
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    let comment = json
+        .comment
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.create_bookmark_use_case()
+        .create_bookmark(url, title, comment)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
+async fn main(app: crate::app::App) -> Result<()> {
+    let app_data = web::Data::new(app);
+    HttpServer::new(move || {
         App::new()
-            .route("/", web::get().to(greet))
-            .route("/{name}", web::get().to(greet))
+            .app_data(app_data.clone())
+            .route("/bookmarks", web::post().to(create_bookmark))
     })
     .bind("127.0.0.1:8080")?
     .run()
