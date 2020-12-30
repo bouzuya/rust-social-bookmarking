@@ -58,12 +58,32 @@ async fn create_bookmark(
     Ok("".to_string())
 }
 
+#[derive(Debug, Deserialize)]
+struct CreateUserRequestBody {
+    secret: String,
+}
+
+async fn create_user(
+    app: web::Data<crate::app::App>,
+    json: web::Json<CreateUserRequestBody>,
+) -> actix_web::Result<String> {
+    let secret = json
+        .secret
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.create_user_use_case()
+        .create_user(secret)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = web::Data::new(app);
     HttpServer::new(move || {
         App::new()
             .app_data(app_data.clone())
             .route("/bookmarks", web::post().to(create_bookmark))
+            .route("/users", web::post().to(create_user))
     })
     .bind("127.0.0.1:8080")?
     .run()
