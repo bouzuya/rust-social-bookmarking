@@ -4,20 +4,20 @@ use crate::use_case::*;
 use std::sync::Arc;
 
 pub struct App {
-    bookmark_repository: Arc<dyn BookmarkRepository>,
-    credential_repository: Arc<dyn CredentialRepository>,
-    send_mail_service: Arc<dyn SendMailService>,
-    session_service: Arc<dyn SessionService>,
-    user_repository: Arc<dyn UserRepository>,
+    bookmark_repository: Arc<dyn BookmarkRepository + Send + Sync>,
+    credential_repository: Arc<dyn CredentialRepository + Send + Sync>,
+    send_mail_service: Arc<dyn SendMailService + Send + Sync>,
+    session_service: Arc<dyn SessionService + Send + Sync>,
+    user_repository: Arc<dyn UserRepository + Send + Sync>,
 }
 
 impl App {
     pub fn new(
-        bookmark_repository: Arc<dyn BookmarkRepository>,
-        credential_repository: Arc<dyn CredentialRepository>,
-        send_mail_service: Arc<dyn SendMailService>,
-        session_service: Arc<dyn SessionService>,
-        user_repository: Arc<dyn UserRepository>,
+        bookmark_repository: Arc<dyn BookmarkRepository + Send + Sync>,
+        credential_repository: Arc<dyn CredentialRepository + Send + Sync>,
+        send_mail_service: Arc<dyn SendMailService + Send + Sync>,
+        session_service: Arc<dyn SessionService + Send + Sync>,
+        user_repository: Arc<dyn UserRepository + Send + Sync>,
     ) -> Self {
         Self {
             bookmark_repository,

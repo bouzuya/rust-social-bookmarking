@@ -5,11 +5,11 @@ use crate::{entity::User, repository::UserRepository};
 use anyhow::Result;
 
 pub struct FsSessionService {
-    user_repository: Arc<dyn UserRepository>,
+    user_repository: Arc<dyn UserRepository + Send + Sync>,
 }
 
 impl FsSessionService {
-    pub fn new(user_repository: Arc<dyn UserRepository>) -> Self {
+    pub fn new(user_repository: Arc<dyn UserRepository + Send + Sync>) -> Self {
         Self { user_repository }
     }
 }
