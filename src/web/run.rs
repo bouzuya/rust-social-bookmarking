@@ -77,12 +77,35 @@ async fn create_user(
     Ok("".to_string())
 }
 
+#[derive(Debug, Deserialize)]
+struct DeleteBookmarkPath {
+    bookmark_key: String,
+}
+
+async fn delete_bookmark(
+    app: web::Data<crate::app::App>,
+    path: web::Path<DeleteBookmarkPath>,
+) -> actix_web::Result<String> {
+    let bookmark_key = path
+        .bookmark_key
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.delete_bookmark_use_case()
+        .delete_bookmark(&bookmark_key)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = web::Data::new(app);
     HttpServer::new(move || {
         App::new()
             .app_data(app_data.clone())
             .route("/bookmarks", web::post().to(create_bookmark))
+            .route(
+                "/bookmarks/{bookmark_key}",
+                web::delete().to(delete_bookmark),
+            )
             .route("/users", web::post().to(create_user))
     })
     .bind("127.0.0.1:8080")?
