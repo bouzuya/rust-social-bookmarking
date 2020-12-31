@@ -291,6 +291,45 @@ async fn sign_up(
     Ok("".to_string())
 }
 
+#[derive(Debug, Deserialize)]
+struct UpdateBookmarkPath {
+    bookmark_key: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct UpdateBookmarkRequestBody {
+    url: String,
+    title: String,
+    comment: String,
+}
+
+async fn update_bookmark(
+    app: Data<crate::app::App>,
+    path: Path<UpdateBookmarkPath>,
+    body: Json<UpdateBookmarkRequestBody>,
+) -> actix_web::Result<String> {
+    let bookmark_key = path
+        .bookmark_key
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    let bookmark_url = body
+        .url
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    let bookmark_title = body
+        .title
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    let bookmark_comment = body
+        .comment
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.update_bookmark_use_case()
+        .update_bookmark(bookmark_key, bookmark_url, bookmark_title, bookmark_comment)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -298,6 +337,7 @@ async fn main(app: crate::app::App) -> Result<()> {
             .app_data(app_data.clone())
             .route("/bookmarks", post().to(create_bookmark))
             .route("/bookmarks/{bookmark_key}", delete().to(delete_bookmark))
+            .route("/bookmarks/{bookmark_key}", patch().to(update_bookmark))
             .route("/credentials", post().to(sign_up))
             .route("/password_resets", post().to(reset_password))
             .route("/sessions", post().to(sign_in))
