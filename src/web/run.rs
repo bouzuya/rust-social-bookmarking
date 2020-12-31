@@ -12,7 +12,7 @@ use diesel::{
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use web::{delete, post, Data, Json, Path};
+use web::{delete, patch, post, Data, Json, Path};
 
 pub async fn run() -> Result<()> {
     dotenv::dotenv().ok();
@@ -217,6 +217,25 @@ async fn list_current_user_bookmarks(
     )
 }
 
+#[derive(Debug, Deserialize)]
+struct ResetPasswordRequestBody {
+    mail_address: String,
+}
+
+async fn reset_password(
+    app: Data<crate::app::App>,
+    body: Json<ResetPasswordRequestBody>,
+) -> actix_web::Result<String> {
+    let mail_address = body
+        .mail_address
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.reset_password_use_case()
+        .reset_password(&mail_address)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -224,6 +243,7 @@ async fn main(app: crate::app::App) -> Result<()> {
             .app_data(app_data.clone())
             .route("/bookmarks", post().to(create_bookmark))
             .route("/bookmarks/{bookmark_key}", delete().to(delete_bookmark))
+            .route("/password_resets", post().to(reset_password))
             .route("/users", post().to(create_user))
             .route("/users/{user_key}", delete().to(delete_user))
             .route("/users/me", get().to(get_current_user))
