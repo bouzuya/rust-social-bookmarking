@@ -1,13 +1,16 @@
 use crate::cli::ConsoleSendMailService;
 use crate::cli::FsSessionService;
 use crate::pg::*;
-use actix_web::{web, App, HttpServer};
+use actix_web::{
+    web::{self, get},
+    App, HttpServer,
+};
 use anyhow::Result;
 use diesel::{
     r2d2::{ConnectionManager, Pool},
     PgConnection,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use web::{delete, post, Data, Json, Path};
 
@@ -116,6 +119,24 @@ async fn delete_user(
     Ok("".to_string())
 }
 
+#[derive(Debug, Serialize)]
+struct GetCurrentUserResponse {
+    key: String,
+}
+
+async fn get_current_user(
+    app: Data<crate::app::App>,
+) -> actix_web::Result<actix_web::HttpResponse> {
+    let current_user = app
+        .get_current_user_use_case()
+        .get_current_user()
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    let current_user = current_user.ok_or_else(|| actix_web::HttpResponse::NotFound())?;
+    Ok(actix_web::HttpResponse::Ok().json(GetCurrentUserResponse {
+        key: current_user.key().to_string(),
+    }))
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -125,6 +146,7 @@ async fn main(app: crate::app::App) -> Result<()> {
             .route("/bookmarks/{bookmark_key}", delete().to(delete_bookmark))
             .route("/users", post().to(create_user))
             .route("/users/{user_key}", delete().to(delete_user))
+            .route("/users/me", get().to(get_current_user))
     })
     .bind("127.0.0.1:8080")?
     .run()
