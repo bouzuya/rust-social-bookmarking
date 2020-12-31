@@ -182,6 +182,41 @@ async fn list_bookmarks_by_user_key(
     )
 }
 
+#[derive(Debug, Serialize)]
+struct ListCurrentUserBookmarksResponse {
+    bookmarks: Vec<ListCurrentUserBookmarksBookmarkResponse>,
+}
+
+#[derive(Debug, Serialize)]
+struct ListCurrentUserBookmarksBookmarkResponse {
+    key: String,
+    url: String,
+    comment: String,
+    title: String,
+}
+
+async fn list_current_user_bookmarks(
+    app: Data<crate::app::App>,
+) -> actix_web::Result<actix_web::HttpResponse> {
+    let bookmarks = app
+        .list_current_user_bookmarks_use_case()
+        .list_current_user_bookmarks()
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok(
+        actix_web::HttpResponse::Ok().json(ListCurrentUserBookmarksResponse {
+            bookmarks: bookmarks
+                .iter()
+                .map(|bookmark| ListCurrentUserBookmarksBookmarkResponse {
+                    key: bookmark.key().to_string(),
+                    url: bookmark.url().to_string(),
+                    comment: bookmark.comment().to_string(),
+                    title: bookmark.title().to_string(),
+                })
+                .collect::<Vec<ListCurrentUserBookmarksBookmarkResponse>>(),
+        }),
+    )
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -196,6 +231,7 @@ async fn main(app: crate::app::App) -> Result<()> {
                 "/users/{user_key}/bookmarks",
                 get().to(list_bookmarks_by_user_key),
             )
+            .route("/users/me/bookmarks", get().to(list_current_user_bookmarks))
     })
     .bind("127.0.0.1:8080")?
     .run()
