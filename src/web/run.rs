@@ -330,6 +330,25 @@ async fn update_bookmark(
     Ok("".to_string())
 }
 
+#[derive(Debug, Deserialize)]
+struct UpdateMailAddressRequestBody {
+    mail_address: String,
+}
+
+async fn update_mail_address(
+    app: Data<crate::app::App>,
+    body: Json<UpdateMailAddressRequestBody>,
+) -> actix_web::Result<String> {
+    let mail_address = body
+        .mail_address
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.update_mail_address_use_case()
+        .update_mail_address(&mail_address)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -339,6 +358,7 @@ async fn main(app: crate::app::App) -> Result<()> {
             .route("/bookmarks/{bookmark_key}", delete().to(delete_bookmark))
             .route("/bookmarks/{bookmark_key}", patch().to(update_bookmark))
             .route("/credentials", post().to(sign_up))
+            .route("/mail_address_updates", post().to(update_mail_address))
             .route("/password_resets", post().to(reset_password))
             .route("/sessions", post().to(sign_in))
             .route("/sessions/current", delete().to(sign_out))
