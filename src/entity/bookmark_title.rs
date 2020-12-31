@@ -27,3 +27,9 @@ impl From<BookmarkTitle> for String {
         bookmark_title.0
     }
 }
+
+impl std::fmt::Display for BookmarkTitle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self.0)
+    }
+}
