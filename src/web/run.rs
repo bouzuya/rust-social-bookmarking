@@ -137,6 +137,51 @@ async fn get_current_user(
     }))
 }
 
+#[derive(Debug, Deserialize)]
+struct ListBookmarksByUserKeyPath {
+    user_key: String,
+}
+
+#[derive(Debug, Serialize)]
+struct ListBookmarksByUserKeyResponse {
+    bookmarks: Vec<ListBookmarksByUserKeyBookmarkResponse>,
+}
+
+#[derive(Debug, Serialize)]
+struct ListBookmarksByUserKeyBookmarkResponse {
+    key: String,
+    url: String,
+    comment: String,
+    title: String,
+}
+
+async fn list_bookmarks_by_user_key(
+    app: Data<crate::app::App>,
+    path: Path<ListBookmarksByUserKeyPath>,
+) -> actix_web::Result<actix_web::HttpResponse> {
+    let user_key = path
+        .user_key
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    let bookmarks = app
+        .list_bookmarks_by_user_key_use_case()
+        .list_bookmarks_by_user_key(&user_key)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok(
+        actix_web::HttpResponse::Ok().json(ListBookmarksByUserKeyResponse {
+            bookmarks: bookmarks
+                .iter()
+                .map(|bookmark| ListBookmarksByUserKeyBookmarkResponse {
+                    key: bookmark.key().to_string(),
+                    url: bookmark.url().to_string(),
+                    comment: bookmark.comment().to_string(),
+                    title: bookmark.title().to_string(),
+                })
+                .collect::<Vec<ListBookmarksByUserKeyBookmarkResponse>>(),
+        }),
+    )
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -147,6 +192,10 @@ async fn main(app: crate::app::App) -> Result<()> {
             .route("/users", post().to(create_user))
             .route("/users/{user_key}", delete().to(delete_user))
             .route("/users/me", get().to(get_current_user))
+            .route(
+                "/users/{user_key}/bookmarks",
+                get().to(list_bookmarks_by_user_key),
+            )
     })
     .bind("127.0.0.1:8080")?
     .run()
