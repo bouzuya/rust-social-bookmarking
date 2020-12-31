@@ -236,6 +236,30 @@ async fn reset_password(
     Ok("".to_string())
 }
 
+#[derive(Debug, Deserialize)]
+struct SignInRequestBody {
+    mail_address: String,
+    password: String,
+}
+
+async fn sign_in(
+    app: Data<crate::app::App>,
+    body: Json<SignInRequestBody>,
+) -> actix_web::Result<String> {
+    let mail_address = body
+        .mail_address
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    let password = body
+        .password
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.sign_in_use_case()
+        .sign_in(&mail_address, &password)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -244,6 +268,7 @@ async fn main(app: crate::app::App) -> Result<()> {
             .route("/bookmarks", post().to(create_bookmark))
             .route("/bookmarks/{bookmark_key}", delete().to(delete_bookmark))
             .route("/password_resets", post().to(reset_password))
+            .route("/sessions", post().to(sign_in))
             .route("/users", post().to(create_user))
             .route("/users/{user_key}", delete().to(delete_user))
             .route("/users/me", get().to(get_current_user))
