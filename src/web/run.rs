@@ -266,6 +266,31 @@ async fn sign_out(app: Data<crate::app::App>) -> actix_web::Result<String> {
         .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
     Ok("".to_string())
 }
+
+#[derive(Debug, Deserialize)]
+struct SignUpRequestBody {
+    mail_address: String,
+    password: String,
+}
+
+async fn sign_up(
+    app: Data<crate::app::App>,
+    body: Json<SignUpRequestBody>,
+) -> actix_web::Result<String> {
+    let mail_address = body
+        .mail_address
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    let password = body
+        .password
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.sign_up_use_case()
+        .sign_up(mail_address, password)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -273,6 +298,7 @@ async fn main(app: crate::app::App) -> Result<()> {
             .app_data(app_data.clone())
             .route("/bookmarks", post().to(create_bookmark))
             .route("/bookmarks/{bookmark_key}", delete().to(delete_bookmark))
+            .route("/credentials", post().to(sign_up))
             .route("/password_resets", post().to(reset_password))
             .route("/sessions", post().to(sign_in))
             .route("/sessions/current", delete().to(sign_out))
