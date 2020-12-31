@@ -39,6 +39,12 @@ impl From<BookmarkKey> for String {
     }
 }
 
+impl std::fmt::Display for BookmarkKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self.0)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
