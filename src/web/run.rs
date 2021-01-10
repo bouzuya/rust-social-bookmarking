@@ -349,6 +349,25 @@ async fn update_mail_address(
     Ok("".to_string())
 }
 
+#[derive(Debug, Deserialize)]
+struct UpdatePasswordRequestBody {
+    password: String,
+}
+
+async fn update_password(
+    app: Data<crate::app::App>,
+    body: Json<UpdatePasswordRequestBody>,
+) -> actix_web::Result<String> {
+    let password = body
+        .password
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.update_password_use_case()
+        .update_password(&password)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -365,6 +384,7 @@ async fn main(app: crate::app::App) -> Result<()> {
             .route("/users", post().to(create_user))
             .route("/users/{user_key}", delete().to(delete_user))
             .route("/users/me", get().to(get_current_user))
+            .route("/users/me/password", patch().to(update_password))
             .route(
                 "/users/{user_key}/bookmarks",
                 get().to(list_bookmarks_by_user_key),
