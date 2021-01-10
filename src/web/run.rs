@@ -368,6 +368,35 @@ async fn update_password(
     Ok("".to_string())
 }
 
+#[derive(Debug, Deserialize)]
+struct UpdatePasswordBySecretPath {
+    secret: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct UpdatePasswordBySecretRequestBody {
+    password: String,
+}
+
+async fn update_password_by_secret(
+    app: Data<crate::app::App>,
+    path: Path<UpdatePasswordBySecretPath>,
+    body: Json<UpdatePasswordBySecretRequestBody>,
+) -> actix_web::Result<String> {
+    let secret = path
+        .secret
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    let password = body
+        .password
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.update_password_by_secret_use_case()
+        .update_password_by_secret(&secret, &password)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -379,6 +408,10 @@ async fn main(app: crate::app::App) -> Result<()> {
             .route("/credentials", post().to(sign_up))
             .route("/mail_address_updates", post().to(update_mail_address))
             .route("/password_resets", post().to(reset_password))
+            .route(
+                "/password_resets/{secret}",
+                patch().to(update_password_by_secret),
+            )
             .route("/sessions", post().to(sign_in))
             .route("/sessions/current", delete().to(sign_out))
             .route("/users", post().to(create_user))
