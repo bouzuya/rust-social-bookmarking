@@ -397,6 +397,25 @@ async fn update_password_by_secret(
     Ok("".to_string())
 }
 
+#[derive(Debug, Deserialize)]
+struct VerifyMailAddressPath {
+    secret: String,
+}
+
+async fn verify_mail_address(
+    app: Data<crate::app::App>,
+    path: Path<VerifyMailAddressPath>,
+) -> actix_web::Result<String> {
+    let secret = path
+        .secret
+        .parse()
+        .map_err(|_| actix_web::HttpResponse::BadRequest())?;
+    app.verify_mail_address_use_case()
+        .verify_mail_address(&secret)
+        .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
+    Ok("".to_string())
+}
+
 async fn main(app: crate::app::App) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
@@ -407,6 +426,10 @@ async fn main(app: crate::app::App) -> Result<()> {
             .route("/bookmarks/{bookmark_key}", patch().to(update_bookmark))
             .route("/credentials", post().to(sign_up))
             .route("/mail_address_updates", post().to(update_mail_address))
+            .route(
+                "/mail_address_updates/{secret}",
+                patch().to(verify_mail_address),
+            )
             .route("/password_resets", post().to(reset_password))
             .route(
                 "/password_resets/{secret}",
