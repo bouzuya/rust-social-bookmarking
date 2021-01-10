@@ -1,6 +1,6 @@
 use crate::cli::ConsoleSendMailService;
-use crate::cli::FsSessionService;
 use crate::pg::*;
+use actix_session::Session;
 use actix_web::{
     web::{self, get},
     App, HttpServer,
@@ -14,6 +14,8 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use web::{delete, patch, post, Data, Json, Path};
 
+use super::{app_base::AppBase, AppWithSession};
+
 pub async fn run() -> Result<()> {
     dotenv::dotenv().ok();
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -23,11 +25,10 @@ pub async fn run() -> Result<()> {
         .expect(&format!("Error connecting to {}", database_url));
 
     let user_repository = Arc::new(PgUserRepository::new(pool.clone()));
-    let app = crate::app::App::new(
+    let app = AppBase::new(
         Arc::new(PgBookmarkRepository::new(pool.clone())),
         Arc::new(PgCredentialRepository::new(pool.clone())),
         Arc::new(ConsoleSendMailService::new()),
-        Arc::new(FsSessionService::new(user_repository.clone())),
         user_repository,
     );
     main(app).await
@@ -41,9 +42,11 @@ struct CreateBookmarkRequestBody {
 }
 
 async fn create_bookmark(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     json: Json<CreateBookmarkRequestBody>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let url = json
         .url
         .parse()
@@ -68,9 +71,11 @@ struct CreateUserRequestBody {
 }
 
 async fn create_user(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     json: Json<CreateUserRequestBody>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let secret = json
         .secret
         .parse()
@@ -87,9 +92,11 @@ struct DeleteBookmarkPath {
 }
 
 async fn delete_bookmark(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     path: Path<DeleteBookmarkPath>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let bookmark_key = path
         .bookmark_key
         .parse()
@@ -106,9 +113,11 @@ struct DeleteUserPath {
 }
 
 async fn delete_user(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     path: Path<DeleteUserPath>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let user_key = path
         .user_key
         .parse()
@@ -125,8 +134,10 @@ struct GetCurrentUserResponse {
 }
 
 async fn get_current_user(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
 ) -> actix_web::Result<actix_web::HttpResponse> {
+    let app = AppWithSession::new(app_base, session);
     let current_user = app
         .get_current_user_use_case()
         .get_current_user()
@@ -156,9 +167,11 @@ struct ListBookmarksByUserKeyBookmarkResponse {
 }
 
 async fn list_bookmarks_by_user_key(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     path: Path<ListBookmarksByUserKeyPath>,
 ) -> actix_web::Result<actix_web::HttpResponse> {
+    let app = AppWithSession::new(app_base, session);
     let user_key = path
         .user_key
         .parse()
@@ -196,8 +209,10 @@ struct ListCurrentUserBookmarksBookmarkResponse {
 }
 
 async fn list_current_user_bookmarks(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
 ) -> actix_web::Result<actix_web::HttpResponse> {
+    let app = AppWithSession::new(app_base, session);
     let bookmarks = app
         .list_current_user_bookmarks_use_case()
         .list_current_user_bookmarks()
@@ -223,9 +238,11 @@ struct ResetPasswordRequestBody {
 }
 
 async fn reset_password(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     body: Json<ResetPasswordRequestBody>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let mail_address = body
         .mail_address
         .parse()
@@ -243,9 +260,11 @@ struct SignInRequestBody {
 }
 
 async fn sign_in(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     body: Json<SignInRequestBody>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let mail_address = body
         .mail_address
         .parse()
@@ -260,7 +279,8 @@ async fn sign_in(
     Ok("".to_string())
 }
 
-async fn sign_out(app: Data<crate::app::App>) -> actix_web::Result<String> {
+async fn sign_out(app_base: Data<AppBase>, session: Session) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     app.sign_out_use_case()
         .sign_out()
         .map_err(|_| actix_web::HttpResponse::InternalServerError())?;
@@ -274,9 +294,11 @@ struct SignUpRequestBody {
 }
 
 async fn sign_up(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     body: Json<SignUpRequestBody>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let mail_address = body
         .mail_address
         .parse()
@@ -304,10 +326,12 @@ struct UpdateBookmarkRequestBody {
 }
 
 async fn update_bookmark(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     path: Path<UpdateBookmarkPath>,
     body: Json<UpdateBookmarkRequestBody>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let bookmark_key = path
         .bookmark_key
         .parse()
@@ -336,9 +360,11 @@ struct UpdateMailAddressRequestBody {
 }
 
 async fn update_mail_address(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     body: Json<UpdateMailAddressRequestBody>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let mail_address = body
         .mail_address
         .parse()
@@ -355,9 +381,11 @@ struct UpdatePasswordRequestBody {
 }
 
 async fn update_password(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     body: Json<UpdatePasswordRequestBody>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let password = body
         .password
         .parse()
@@ -379,10 +407,12 @@ struct UpdatePasswordBySecretRequestBody {
 }
 
 async fn update_password_by_secret(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     path: Path<UpdatePasswordBySecretPath>,
     body: Json<UpdatePasswordBySecretRequestBody>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let secret = path
         .secret
         .parse()
@@ -403,9 +433,11 @@ struct VerifyMailAddressPath {
 }
 
 async fn verify_mail_address(
-    app: Data<crate::app::App>,
+    app_base: Data<AppBase>,
+    session: Session,
     path: Path<VerifyMailAddressPath>,
 ) -> actix_web::Result<String> {
+    let app = AppWithSession::new(app_base, session);
     let secret = path
         .secret
         .parse()
@@ -416,7 +448,7 @@ async fn verify_mail_address(
     Ok("".to_string())
 }
 
-async fn main(app: crate::app::App) -> Result<()> {
+async fn main(app: AppBase) -> Result<()> {
     let app_data = Data::new(app);
     HttpServer::new(move || {
         App::new()
