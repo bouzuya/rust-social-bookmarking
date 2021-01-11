@@ -7,7 +7,8 @@ use crate::use_case::{
     VerifyMailAddressUseCase,
 };
 use actix_session::Session;
-use actix_web::web::Data;
+use actix_web::{web::Data, FromRequest};
+use futures_util::future::{err, ok, Ready};
 use std::sync::Arc;
 
 pub struct AppWithSession {
@@ -132,5 +133,25 @@ impl AppWithSession {
 
     pub fn verify_mail_address_use_case(&self) -> VerifyMailAddressUseCase {
         VerifyMailAddressUseCase::new(self.app.credential_repository.clone())
+    }
+}
+
+impl FromRequest for AppWithSession {
+    type Config = ();
+    type Error = actix_web::Error;
+    type Future = Ready<Result<Self, Self::Error>>;
+
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        match (
+            Data::<AppBase>::from_request(req, payload).into_inner(),
+            Session::from_request(req, payload).into_inner(),
+        ) {
+            (Err(e), _) => err(e),
+            (_, Err(e)) => err(e),
+            (Ok(app_base), Ok(session)) => ok(AppWithSession::new(app_base, session)),
+        }
     }
 }

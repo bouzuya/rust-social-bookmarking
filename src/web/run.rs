@@ -1,3 +1,4 @@
+use super::{app_base::AppBase, AppWithSession};
 use crate::cli::ConsoleSendMailService;
 use crate::pg::*;
 use actix_session::Session;
@@ -13,8 +14,6 @@ use diesel::{
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use web::{delete, patch, post, Data, Json, Path};
-
-use super::{app_base::AppBase, AppWithSession};
 
 pub async fn run() -> Result<()> {
     dotenv::dotenv().ok();
@@ -42,11 +41,9 @@ struct CreateBookmarkRequestBody {
 }
 
 async fn create_bookmark(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
     json: Json<CreateBookmarkRequestBody>,
 ) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
     let url = json
         .url
         .parse()
@@ -71,11 +68,9 @@ struct CreateUserRequestBody {
 }
 
 async fn create_user(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
     json: Json<CreateUserRequestBody>,
 ) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
     let secret = json
         .secret
         .parse()
@@ -92,11 +87,9 @@ struct DeleteBookmarkPath {
 }
 
 async fn delete_bookmark(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
     path: Path<DeleteBookmarkPath>,
 ) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
     let bookmark_key = path
         .bookmark_key
         .parse()
@@ -112,12 +105,7 @@ struct DeleteUserPath {
     user_key: String,
 }
 
-async fn delete_user(
-    app_base: Data<AppBase>,
-    session: Session,
-    path: Path<DeleteUserPath>,
-) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
+async fn delete_user(app: AppWithSession, path: Path<DeleteUserPath>) -> actix_web::Result<String> {
     let user_key = path
         .user_key
         .parse()
@@ -133,11 +121,7 @@ struct GetCurrentUserResponse {
     key: String,
 }
 
-async fn get_current_user(
-    app_base: Data<AppBase>,
-    session: Session,
-) -> actix_web::Result<actix_web::HttpResponse> {
-    let app = AppWithSession::new(app_base, session);
+async fn get_current_user(app: AppWithSession) -> actix_web::Result<actix_web::HttpResponse> {
     let current_user = app
         .get_current_user_use_case()
         .get_current_user()
@@ -167,11 +151,9 @@ struct ListBookmarksByUserKeyBookmarkResponse {
 }
 
 async fn list_bookmarks_by_user_key(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
     path: Path<ListBookmarksByUserKeyPath>,
 ) -> actix_web::Result<actix_web::HttpResponse> {
-    let app = AppWithSession::new(app_base, session);
     let user_key = path
         .user_key
         .parse()
@@ -209,10 +191,8 @@ struct ListCurrentUserBookmarksBookmarkResponse {
 }
 
 async fn list_current_user_bookmarks(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
 ) -> actix_web::Result<actix_web::HttpResponse> {
-    let app = AppWithSession::new(app_base, session);
     let bookmarks = app
         .list_current_user_bookmarks_use_case()
         .list_current_user_bookmarks()
@@ -238,11 +218,9 @@ struct ResetPasswordRequestBody {
 }
 
 async fn reset_password(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
     body: Json<ResetPasswordRequestBody>,
 ) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
     let mail_address = body
         .mail_address
         .parse()
@@ -259,12 +237,7 @@ struct SignInRequestBody {
     password: String,
 }
 
-async fn sign_in(
-    app_base: Data<AppBase>,
-    session: Session,
-    body: Json<SignInRequestBody>,
-) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
+async fn sign_in(app: AppWithSession, body: Json<SignInRequestBody>) -> actix_web::Result<String> {
     let mail_address = body
         .mail_address
         .parse()
@@ -293,12 +266,7 @@ struct SignUpRequestBody {
     password: String,
 }
 
-async fn sign_up(
-    app_base: Data<AppBase>,
-    session: Session,
-    body: Json<SignUpRequestBody>,
-) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
+async fn sign_up(app: AppWithSession, body: Json<SignUpRequestBody>) -> actix_web::Result<String> {
     let mail_address = body
         .mail_address
         .parse()
@@ -326,12 +294,10 @@ struct UpdateBookmarkRequestBody {
 }
 
 async fn update_bookmark(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
     path: Path<UpdateBookmarkPath>,
     body: Json<UpdateBookmarkRequestBody>,
 ) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
     let bookmark_key = path
         .bookmark_key
         .parse()
@@ -360,11 +326,9 @@ struct UpdateMailAddressRequestBody {
 }
 
 async fn update_mail_address(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
     body: Json<UpdateMailAddressRequestBody>,
 ) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
     let mail_address = body
         .mail_address
         .parse()
@@ -381,11 +345,9 @@ struct UpdatePasswordRequestBody {
 }
 
 async fn update_password(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
     body: Json<UpdatePasswordRequestBody>,
 ) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
     let password = body
         .password
         .parse()
@@ -407,12 +369,10 @@ struct UpdatePasswordBySecretRequestBody {
 }
 
 async fn update_password_by_secret(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
     path: Path<UpdatePasswordBySecretPath>,
     body: Json<UpdatePasswordBySecretRequestBody>,
 ) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
     let secret = path
         .secret
         .parse()
@@ -433,11 +393,9 @@ struct VerifyMailAddressPath {
 }
 
 async fn verify_mail_address(
-    app_base: Data<AppBase>,
-    session: Session,
+    app: AppWithSession,
     path: Path<VerifyMailAddressPath>,
 ) -> actix_web::Result<String> {
-    let app = AppWithSession::new(app_base, session);
     let secret = path
         .secret
         .parse()
