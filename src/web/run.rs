@@ -1,5 +1,4 @@
-use super::{app_base::AppBase, AppWithSession};
-use crate::cli::ConsoleSendMailService;
+use super::{app_base::AppBase, AppWithSession, SmtpSendMailService};
 use crate::pg::*;
 use actix_session::Session;
 use actix_web::{
@@ -27,7 +26,7 @@ pub async fn run() -> Result<()> {
     let app = AppBase::new(
         Arc::new(PgBookmarkRepository::new(pool.clone())),
         Arc::new(PgCredentialRepository::new(pool.clone())),
-        Arc::new(ConsoleSendMailService::new()),
+        Arc::new(SmtpSendMailService::new()),
         user_repository,
     );
     main(app).await
